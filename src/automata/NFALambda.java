@@ -6,6 +6,16 @@ import utils.Triple;
 
 public class NFALambda extends FA {
 	
+    /*
+    Variables globales para almacenar, representan las 5 partes de la tupla que
+    es el AFD
+    */
+    Set<State> estados;
+    Set<Character> alfabeto;
+    Set<Triple<State, Character, State>> delta;
+    State inicial;
+    Set<State> estados_finales;
+    
 	/*
 	 *  Construction
 	*/
@@ -27,29 +37,32 @@ public class NFALambda extends FA {
 	 *	State querying 
 	*/
 
-	@Override
-	public Set<State> states() {
-		// TODO
-		return null;
-	}
+	/*
+     *	State querying 
+     */
+    @Override
+    public Set<State> states() {
+        // TODO
+        return estados;
+    }
 
-	@Override
-	public Set<Character> alphabet() {
-		// TODO
-		return null;
-	}
+    @Override
+    public Set<Character> alphabet() {
+        // TODO
+        return alfabeto;
+    }
 
-	@Override
-	public State initial_state() {
-		// TODO
-		return null;
-	}
+    @Override
+    public State initial_state() {
+        // TODO
+        return inicial;
+    }
 
-	@Override
-	public Set<State> final_states() {
-		// TODO
-		return null;
-	}
+    @Override
+    public Set<State> final_states() {
+        // TODO
+        return estados_finales;
+    }
 
 	@Override
 	public Set<State> delta(State from, Character c) {

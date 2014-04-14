@@ -5,7 +5,6 @@ import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 
-
 import java.util.Set;
 
 public abstract class FA {
@@ -40,7 +39,7 @@ public abstract class FA {
      */
     public static FA parse_form_file(String path) throws Exception {
         // TODO
-        try{
+        try {
             // Abrimos el archivo
             FileInputStream fstream = new FileInputStream(path);
             // Creamos el objeto de entrada
@@ -49,13 +48,13 @@ public abstract class FA {
             BufferedReader buffer = new BufferedReader(new InputStreamReader(entrada));
             String strLinea;
             // Leer el archivo linea por linea
-            while ((strLinea = buffer.readLine()) != null)   {
+            while ((strLinea = buffer.readLine()) != null) {
                 // Imprimimos la línea por pantalla
                 //System.out.println (strLinea);
             }
             // Cerramos el archivo
             entrada.close();
-        }catch (Exception e){ //Catch de excepciones
+        } catch (Exception e) { //Catch de excepciones
             System.err.println("Ocurrio un error: " + e.getMessage());
         }
         return null;
