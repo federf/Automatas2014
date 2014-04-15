@@ -10,14 +10,13 @@ public class DFA extends FA {
 
     /*
     Variables globales para almacenar, representan las 5 partes de la tupla que
-    es el AFD
-    */
+    es el AFD*/
+
     Set<State> estados;
     Set<Character> alfabeto;
     Set<Triple<State, Character, State>> delta;
     State inicial;
     Set<State> estados_finales;
-
     /*	
      * 	Construction
      */

@@ -4,12 +4,21 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.util.HashSet;
 
 import java.util.Set;
+import utils.Triple;
 
 public abstract class FA {
 
     public static final Character Lambda = '_';
+
+    // variables para representar los elementos de la 5upla que representan a los automatas
+    /*Set<State> estados;  //conjunto de estados
+     Set<Character> alfabeto; //conjunto de caracteres del alfabeto del automata
+     Set<Triple<State, Character, State>> delta; //conjunto de triplas (estado, caracter, estado) que representan la delta
+     State inicial; //estado inicial
+     Set<State> estados_finales; //conjunto de estados finales*/
 
     /* Creation */
     /**
@@ -40,6 +49,13 @@ public abstract class FA {
     public static FA parse_form_file(String path) throws Exception {
         // TODO
         try {
+            Set<State> estados = new HashSet<State>();  //conjunto de estados
+            Set<Character> alfabeto = new HashSet<Character>(); //conjunto de caracteres del alfabeto del automata
+            Set<Triple<State, Character, State>> delta = new HashSet<Triple<State, Character, State>>(); //conjunto de triplas (estado, caracter, estado) que representan la delta
+            State inicial = null; //estado inicial
+            Set<State> estados_finales = new HashSet<State>(); //conjunto de estados finales
+
+            String estadoLeido = "";
             // Abrimos el archivo
             FileInputStream fstream = new FileInputStream(path);
             // Creamos el objeto de entrada
@@ -49,8 +65,102 @@ public abstract class FA {
             String strLinea;
             // Leer el archivo linea por linea
             while ((strLinea = buffer.readLine()) != null) {
-                // Imprimimos la línea por pantalla
-                //System.out.println (strLinea); //A IMPLEMENTAR
+                if (strLinea.contains("inic->")) { //si la linea tiene el formato de un estado inicial
+                    int inicLect = strLinea.indexOf(">") + 1; //busca el caracter por donde comenzar a leer el nombre del estado inicial
+                    for (int i = inicLect; i < strLinea.length() - 1; i++) {
+                        estadoLeido = estadoLeido + strLinea.charAt(i); //lee caracter por caracter el nombre del estado inicial
+                    }
+                    State s = new State(estadoLeido); //crea el estado inicial como tal
+                    if (estados.isEmpty()) {
+                        estados.add(s);
+                    }
+
+                    if (!estados.contains(s)) { // si no es vacio el conjunto de estados y no contiene el estado, se lo agrega
+                        estados.add(s); //ERROR ACA, NO ESTA BIEN INICIALIZADO EL SET DE ESTADOS AL PARECER
+                    }
+                    inicial = s; // se asigna el estado creado al estado inicial de la tupla que representa el automata
+
+                }
+                if (strLinea.contains("label") && strLinea.contains(Lambda.toString())) { //si es una transicion lambda
+                    int i = 0;
+                    char charCorriente = strLinea.charAt(0);
+                    String estado = ""; //nombre estado leido
+                    while (i < strLinea.length() && (charCorriente != '-')) { //lee el 1er estado (inicio de la transicion)
+                        charCorriente = strLinea.charAt(i);
+                        estado = estado + charCorriente;
+                        i++;
+                    }
+
+                    State s = new State(estado);
+                    if (!estados.contains(s)) { //si no esta incluido en el conjunto de estados
+                        estados.add(s); // lo agrega
+                    }
+                    System.out.println("ESTADO LEIDO   " + s.name());
+                    i = strLinea.indexOf(">") + 1;
+                    charCorriente = strLinea.charAt(i);
+                    while (i < strLinea.length() && (charCorriente != ' ')) { //lee el 2do estado (final de la transicion)
+                        charCorriente = strLinea.charAt(i);
+                        estado = estado + charCorriente;
+                        i++;
+                    }
+                    s = new State(estado);
+                    System.out.println("---------->>");
+                    System.out.println("ESTADO LEIDO  2 " + s.name());
+                    if (!estados.contains(s)) { //si no esta en el conjunto de estados, lo agrega
+                        estados.add(s);
+                    }
+                    if (!alfabeto.contains(Lambda)) { //agrega lambda al alfabeto
+                        alfabeto.add(Lambda);
+                    }
+                } else {
+
+                    System.out.println("");
+                    System.out.println("");
+                    
+                    if (strLinea.contains("label")) {
+                        char charCorriente = strLinea.charAt(0);
+                        String estado = ""; //nombre estado leido
+                        int hasta = strLinea.indexOf("-");
+                        for (int i = 0; i < hasta; i++) { //lee el 1er estado (inicio de la transicion)
+                            charCorriente = strLinea.charAt(i);
+                            estado = estado + charCorriente;
+                        }
+
+                        System.out.println("ULTIMO CHAR LEIDO  " + charCorriente);
+
+                        State s = new State(estado);
+                        System.out.println("ESTADO LEIDO   " + s.name());
+                        if (!estados.contains(s)) { //si no esta incluido en el conjunto de estados
+                            estados.add(s); // lo agrega
+                        }
+
+                        /*******************************************************/
+                        
+
+                        int desde = strLinea.lastIndexOf("q");
+                        hasta = strLinea.indexOf("[") - 1;
+                        charCorriente = strLinea.charAt(desde);
+                        estado="";
+                        for (int i = desde; i < hasta; i++) { //lee el 2do estado (final de la transicion)
+                            charCorriente = strLinea.charAt(i);
+                            estado = estado + charCorriente;
+                        }
+                        s = new State(estado);
+                        System.out.println("---------->>");
+                        System.out.println("ESTADO LEIDO  2 " + s.name());
+
+                        if (!estados.contains(s)) { //si no esta en el conjunto de estados, lo agrega
+                            estados.add(s);
+                        }
+                        
+                        /*********************************************************/
+                        char label = strLinea.charAt(strLinea.indexOf('"') + 1); //busca la etiqueta de la transicion
+                        if (!alfabeto.contains(label)) { //si no esta incluida en el alfabetos
+                            alfabeto.add(label); //la agrega
+                        }
+                    }
+                }
+
             }
             // Cerramos el archivo
             entrada.close();
