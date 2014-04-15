@@ -50,7 +50,7 @@ public abstract class FA {
             // Leer el archivo linea por linea
             while ((strLinea = buffer.readLine()) != null) {
                 // Imprimimos la línea por pantalla
-                //System.out.println (strLinea);
+                //System.out.println (strLinea); //A IMPLEMENTAR
             }
             // Cerramos el archivo
             entrada.close();
