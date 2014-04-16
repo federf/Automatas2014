@@ -1,5 +1,6 @@
 package automata;
 
+import java.util.LinkedList;
 import java.util.Set;
 
 import utils.Triple;
@@ -115,7 +116,34 @@ public class NFA extends FA {
 		// TODO: Check that the alphabet does not contains lambda.
 		// TODO: Check that initial and final states are included in 'states'.
 		// TODO: Check that all transitions are correct. All states and characters should be part of the automaton set of states and alphabet.
-		return true;
+        boolean inicOk=false;
+        boolean finalesOk=true;
+        boolean transicionesOk=true;
+        
+        LinkedList<String> states=new LinkedList();
+        for(State s:estados){ //buscamos los nombres de los estados
+            states.add(s.name());
+        }
+        LinkedList<String>finales=new LinkedList();
+        for(State f:estados_finales){  //buscamos los nombres de los estados finales
+            finales.add(f.name());
+        }
+        
+        
+        for(int i=0; i<states.size();i++){ //verificamos que el estado inicial pertenece al conjunto de estados
+            inicOk=inicOk || (states.get(i).equals(inicial.name()));
+        }
+        
+        for(int i=0; i<finales.size();i++){ //verificamos que los estados finales pertenecen al conjunto de estados
+            finalesOk=finalesOk && (states.contains(finales.get(i)));
+        }
+        
+        for(Triple<State, Character, State> t : delta){ //verificamos que las transiciones son validas 
+            transicionesOk=transicionesOk && (states.contains(t.first().name()) && states.contains(t.third().name()) && alfabeto.contains(t.second())); // (los estados utilizados pertenecen al conjunto de estados y el simbolo utilizado pertenece al alfabeto)
+        }
+        
+		return (inicOk && finalesOk && transicionesOk);
+        
 	} 
 
 
