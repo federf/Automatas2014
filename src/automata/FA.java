@@ -49,6 +49,8 @@ public abstract class FA {
     public static FA parse_form_file(String path) throws Exception {
         // TODO
         try {
+            String automataACrear = "AFD";
+
             Set<State> estados = new HashSet<State>();  //conjunto de estados
             Set<Character> alfabeto = new HashSet<Character>(); //conjunto de caracteres del alfabeto del automata
             Set<Triple<State, Character, State>> delta = new HashSet<Triple<State, Character, State>>(); //conjunto de triplas (estado, caracter, estado) que representan la delta
@@ -81,10 +83,11 @@ public abstract class FA {
                         estados.add(s); //ERROR ACA, NO ESTA BIEN INICIALIZADO EL SET DE ESTADOS AL PARECER
                     }
                     inicial = s; // se asigna el estado creado al estado inicial de la tupla que representa el automata
-                    System.out.println("estado guardado"+s.name());
+                    System.out.println("estado guardado" + s.name());
                 }
                 if (strLinea.contains("label") && strLinea.contains(Lambda.toString())) { //si es una transicion lambda
                     System.out.println("TRANSICION LAMBDA");
+                    automataACrear = "AFNLambda";
                     char charCorriente = strLinea.charAt(0);
                     String estado = ""; //nombre estado leido
                     int hasta = strLinea.indexOf("-");
@@ -181,6 +184,17 @@ public abstract class FA {
                         }
                     }
                 }
+
+                for (Triple<State, Character, State> elem1 : delta) {
+                    for (Triple<State, Character, State> elem2 : delta) {
+                        if(!elem1.equals(elem2)){
+                            if((elem1.first().equals(elem2.first()))&& (elem1.second().equals(elem2.second()))){
+                                automataACrear="AFN";
+                            }
+                        }
+                    }
+                }
+
                 if (strLinea.contains("[shape=doublecircle];")) {
                     System.out.println("ESTADO FINAL");
                     char charCorriente = strLinea.charAt(0);
@@ -200,6 +214,17 @@ public abstract class FA {
             }
             // Cerramos el archivo
             entrada.close();
+            
+            if(automataACrear.equals("AFNLambda")){
+                return new NFALambda(estados,alfabeto,delta,inicial,estados_finales);
+            }else{
+                if(automataACrear.equals("AFN")){
+                    return new NFA(estados,alfabeto,delta,inicial,estados_finales);
+                }else{
+                    return new DFA(estados,alfabeto,delta,inicial,estados_finales);
+                }
+            }
+            
         } catch (Exception e) { //Catch de excepciones
             System.err.println("Ocurrio un error: " + e.getMessage());
         }
