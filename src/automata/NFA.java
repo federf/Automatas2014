@@ -28,6 +28,11 @@ public class NFA extends FA {
 	throws IllegalArgumentException
 	{
 		// TODO
+        estados=states;
+        alfabeto=alphabet;
+        delta=transitions;
+        inicial=initial;
+        estados_finales=final_states;
 	}
 
 	
