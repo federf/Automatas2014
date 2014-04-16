@@ -5,6 +5,8 @@ import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 import java.util.Set;
 import utils.Triple;
@@ -49,12 +51,29 @@ public abstract class FA {
     public static FA parse_form_file(String path) throws Exception {
         // TODO
         try {
+            String a = "a";
+            String b = "a";
+            System.out.println(a.equals(b));
+
+            System.out.println(a.compareTo(b));
+
             String automataACrear = "AFD";
 
+            /*******************************ESTADOS***********************/
             Set<State> estados = new HashSet<State>();  //conjunto de estados
+            LinkedList<String> nombresEstados = new LinkedList<String>(); //lista de los nombres de los estados
+
+            /*******************************ALFABETO***********************/
             Set<Character> alfabeto = new HashSet<Character>(); //conjunto de caracteres del alfabeto del automata
+            
+            /*******************************DELTA***********************/
+            LinkedList<Triple<State, Character, State>> transiciones = new LinkedList<Triple<State, Character, State>>(); //lista de transiciones para verificar si el AF es Det o NoDet
             Set<Triple<State, Character, State>> delta = new HashSet<Triple<State, Character, State>>(); //conjunto de triplas (estado, caracter, estado) que representan la delta
+            
+            /*******************************ESTADO INICIAL***********************/
             State inicial = null; //estado inicial
+            
+            /*******************************ESTADOS FINALES***********************/
             Set<State> estados_finales = new HashSet<State>(); //conjunto de estados finales
 
             String estadoLeido = "";
@@ -74,16 +93,16 @@ public abstract class FA {
                     for (int i = inicLect; i < strLinea.length() - 1; i++) {
                         estadoLeido = estadoLeido + strLinea.charAt(i); //lee caracter por caracter el nombre del estado inicial
                     }
-                    State s = new State(estadoLeido); //crea el estado inicial como tal
-                    if (estados.isEmpty()) {
-                        estados.add(s);
+                    //State s = new State(estadoLeido); //crea el estado inicial como tal
+                    if (nombresEstados.isEmpty()) {
+                        nombresEstados.add(estadoLeido);
                     }
 
-                    if (!estados.contains(s)) { // si no es vacio el conjunto de estados y no contiene el estado, se lo agrega
-                        estados.add(s); //ERROR ACA, NO ESTA BIEN INICIALIZADO EL SET DE ESTADOS AL PARECER
+                    if (!nombresEstados.contains(estadoLeido)) { // si no es vacio el conjunto de estados y no contiene el estado, se lo agrega
+                        nombresEstados.add(estadoLeido); //ERROR ACA, NO ESTA BIEN INICIALIZADO EL SET DE ESTADOS AL PARECER
                     }
-                    inicial = s; // se asigna el estado creado al estado inicial de la tupla que representa el automata
-                    System.out.println("estado guardado" + s.name());
+                    inicial = new State(estadoLeido); // se asigna el estado creado al estado inicial de la tupla que representa el automata
+                    System.out.println("estado inicial guardado: " + inicial.name());
                 }
                 if (strLinea.contains("label") && strLinea.contains(Lambda.toString())) { //si es una transicion lambda
                     System.out.println("TRANSICION LAMBDA");
@@ -91,7 +110,7 @@ public abstract class FA {
                     char charCorriente = strLinea.charAt(0);
                     String estado = ""; //nombre estado leido
                     int hasta = strLinea.indexOf("-");
-                    for (int i = 0; i < hasta; i++) { //lee el 1er estado (inicio de la transicion)
+                    for (int i = 4; i < hasta; i++) { //lee el 1er estado (inicio de la transicion)
                         charCorriente = strLinea.charAt(i);
                         estado = estado + charCorriente;
                     }
@@ -99,9 +118,10 @@ public abstract class FA {
                     System.out.println("ULTIMO CHAR LEIDO  " + charCorriente);
 
                     State s = new State(estado);
-                    System.out.println("ESTADO LEIDO   " + s.name());
-                    if (!estados.contains(s)) { //si no esta incluido en el conjunto de estados
-                        estados.add(s); // lo agrega
+                    estado = estado.trim();
+                    System.out.println("ESTADO LEIDO   " + estado);
+                    if (!nombresEstados.contains(estado)) { //si no esta incluido en el conjunto de estados
+                        nombresEstados.add(estado); // lo agrega
                     }
 
                     /**
@@ -110,17 +130,20 @@ public abstract class FA {
                     int desde = strLinea.lastIndexOf("q");
                     hasta = strLinea.indexOf("[") - 1;
                     charCorriente = strLinea.charAt(desde);
-                    estado = "";
+                    String estado2 = "";
                     for (int i = desde; i < hasta; i++) { //lee el 2do estado (final de la transicion)
                         charCorriente = strLinea.charAt(i);
-                        estado = estado + charCorriente;
+                        estado2 = estado2 + charCorriente;
                     }
+
+                    estado2 = estado2.trim();
+
                     State s2 = new State(estado);
                     System.out.println("---------->>");
-                    System.out.println("ESTADO LEIDO  2 " + s2.name());
+                    System.out.println("ESTADO LEIDO  2 " + estado2);
 
-                    if (!estados.contains(s2)) { //si no esta en el conjunto de estados, lo agrega
-                        estados.add(s2);
+                    if (!nombresEstados.contains(estado2)) { //si no esta en el conjunto de estados, lo agrega
+                        nombresEstados.add(estado2);
                     }
 
                     /**
@@ -132,6 +155,7 @@ public abstract class FA {
                     Triple t = new Triple(s, Lambda, s2);
                     if (!delta.contains(t)) {
                         delta.add(t);
+                        transiciones.add(t);
                     }
                 } else {
                     if (strLinea.contains("label")) {
@@ -139,7 +163,7 @@ public abstract class FA {
                         char charCorriente = strLinea.charAt(0);
                         String estado = ""; //nombre estado leido
                         int hasta = strLinea.indexOf("-");
-                        for (int i = 0; i < hasta; i++) { //lee el 1er estado (inicio de la transicion)
+                        for (int i = 4; i < hasta; i++) { //lee el 1er estado (inicio de la transicion)
                             charCorriente = strLinea.charAt(i);
                             estado = estado + charCorriente;
                         }
@@ -147,9 +171,12 @@ public abstract class FA {
                         System.out.println("ULTIMO CHAR LEIDO  " + charCorriente);
 
                         State s = new State(estado);
-                        System.out.println("ESTADO LEIDO   " + s.name());
-                        if (!estados.contains(s)) { //si no esta incluido en el conjunto de estados
-                            estados.add(s); // lo agrega
+
+                        estado = estado.trim();
+
+                        System.out.println("ESTADO LEIDO   " + estado);
+                        if (!nombresEstados.contains(estado)) { //si no esta incluido en el conjunto de estados
+                            nombresEstados.add(estado); // lo agrega
                         }
 
                         /**
@@ -158,17 +185,20 @@ public abstract class FA {
                         int desde = strLinea.lastIndexOf("q");
                         hasta = strLinea.indexOf("[") - 1;
                         charCorriente = strLinea.charAt(desde);
-                        estado = "";
+                        String estado2 = "";
                         for (int i = desde; i < hasta; i++) { //lee el 2do estado (final de la transicion)
                             charCorriente = strLinea.charAt(i);
-                            estado = estado + charCorriente;
+                            estado2 = estado2 + charCorriente;
                         }
-                        State s2 = new State(estado);
-                        System.out.println("---------->>");
-                        System.out.println("ESTADO LEIDO  2 " + s2.name());
+                        State s2 = new State(estado2);
 
-                        if (!estados.contains(s2)) { //si no esta en el conjunto de estados, lo agrega
-                            estados.add(s2);
+                        estado2 = estado2.trim();
+
+                        System.out.println("---------->>");
+                        System.out.println("ESTADO LEIDO  2 " + estado2);
+
+                        if (!nombresEstados.contains(estado2)) { //si no esta en el conjunto de estados, lo agrega
+                            nombresEstados.add(estado2);
                         }
 
                         /**
@@ -181,16 +211,7 @@ public abstract class FA {
                         Triple t = new Triple(s, label, s2);
                         if (!delta.contains(t)) {
                             delta.add(t);
-                        }
-                    }
-                }
-
-                for (Triple<State, Character, State> elem1 : delta) {
-                    for (Triple<State, Character, State> elem2 : delta) {
-                        if(!elem1.equals(elem2)){
-                            if((elem1.first().equals(elem2.first()))&& (elem1.second().equals(elem2.second()))){
-                                automataACrear="AFN";
-                            }
+                            transiciones.add(t);
                         }
                     }
                 }
@@ -214,17 +235,40 @@ public abstract class FA {
             }
             // Cerramos el archivo
             entrada.close();
-            
-            if(automataACrear.equals("AFNLambda")){
-                return new NFALambda(estados,alfabeto,delta,inicial,estados_finales);
-            }else{
-                if(automataACrear.equals("AFN")){
-                    return new NFA(estados,alfabeto,delta,inicial,estados_finales);
-                }else{
-                    return new DFA(estados,alfabeto,delta,inicial,estados_finales);
+            for (int i = 0; i < transiciones.size(); i++) {
+                for (int j = 0; j < transiciones.size(); j++) {
+                    if (i != j) {
+                        Triple<State, Character, State> elem1 = transiciones.get(i);
+                        Triple<State, Character, State> elem2 = transiciones.get(j);
+                        if ((elem1.first().name().equals(elem2.first().name())) && (elem1.second().equals(elem2.second()))) {
+                            automataACrear = "AFN";
+                            i=transiciones.size();
+                            j=transiciones.size();
+                        }
+                    }
                 }
             }
-            
+
+            for (int i = 0; i < nombresEstados.size(); i++) {
+                String nombre = nombresEstados.get(i);
+                State e = new State(nombre);
+                estados.add(e);
+            }
+
+            if (automataACrear.equals("AFNLambda")) {
+                System.out.println("CREO AFNLAMBDA");
+                return new NFALambda(estados, alfabeto, delta, inicial, estados_finales);
+            } else {
+
+                if (automataACrear.equals("AFN")) {
+                    System.out.println("CREO AFN");
+                    return new NFA(estados, alfabeto, delta, inicial, estados_finales);
+                } else {
+                    System.out.println("CREO AFD");
+                    return new DFA(estados, alfabeto, delta, inicial, estados_finales);
+                }
+            }
+
         } catch (Exception e) { //Catch de excepciones
             System.err.println("Ocurrio un error: " + e.getMessage());
         }

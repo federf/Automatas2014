@@ -2,6 +2,9 @@ package utils;
 
 /**
  *	Implements an immutable 3-uple. 
+ * @param <A>
+ * @param <B>
+ * @param <C>
 */
 public class Triple<A,B,C> {
 
