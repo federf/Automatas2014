@@ -1,7 +1,7 @@
 package automata;
 
 import static automata.FA.Lambda;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
@@ -80,7 +80,7 @@ public class NFALambda extends FA {
          for (Triple<State, Character, State> t : delta) {
          transiciones.add(t);
          }
-         Set<State> result = new HashSet<State>(); //set de resultado
+         Set<State> result = new LinkedHashSet<State>(); //set de resultado
          result.add(from);
          for (int i = 0; i < transiciones.size(); i++) { //buscamos las transiciones desde from por c y agregamos el destino de estas al conjunto resultado
          Triple<State, Character, State> actual = transiciones.get(i);
@@ -101,7 +101,7 @@ public class NFALambda extends FA {
          return result;
          } else {
          System.out.println("Caracter o Estado Invalido");
-         return new HashSet<State>();
+         return new LinkedHashSet<State>();
          }*/
         return null;
 

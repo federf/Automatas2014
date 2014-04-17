@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 
 import java.util.Set;
@@ -47,17 +47,17 @@ public abstract class FA {
             /**
              * *****************************ESTADOS**********************
              */
-            Set<State> estados = new HashSet<State>();  //conjunto de estados
+            Set<State> estados = new LinkedHashSet<State>();  //conjunto de estados
             LinkedList<String> nombresEstados = new LinkedList<String>(); //lista de los nombres de los estados
             /**
              * *****************************ALFABETO**********************
              */
-            Set<Character> alfabeto = new HashSet<Character>(); //conjunto de caracteres del alfabeto del automata
+            Set<Character> alfabeto = new LinkedHashSet<Character>(); //conjunto de caracteres del alfabeto del automata
             /**
              * *****************************DELTA**********************
              */
             LinkedList<Triple<State, Character, State>> transiciones = new LinkedList<Triple<State, Character, State>>(); //lista de transiciones para verificar si el AF es Det o NoDet
-            Set<Triple<State, Character, State>> delta = new HashSet<Triple<State, Character, State>>(); //conjunto de triplas (estado, caracter, estado) que representan la delta
+            Set<Triple<State, Character, State>> delta = new LinkedHashSet<Triple<State, Character, State>>(); //conjunto de triplas (estado, caracter, estado) que representan la delta
             /**
              * *****************************ESTADO INICIAL**********************
              */
@@ -65,7 +65,7 @@ public abstract class FA {
             /**
              * *****************************ESTADOS FINALES**********************
              */
-            Set<State> estados_finales = new HashSet<State>(); //conjunto de estados finales
+            Set<State> estados_finales = new LinkedHashSet<State>(); //conjunto de estados finales
             String estadoLeido = "";
             // Abrimos el archivo
             FileInputStream fstream = new FileInputStream(path);

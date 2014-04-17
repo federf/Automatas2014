@@ -1,7 +1,7 @@
 package automata;
 
 import static automata.FA.Lambda;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
