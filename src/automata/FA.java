@@ -221,7 +221,7 @@ public abstract class FA {
                     char charCorriente = strLinea.charAt(0);
                     String estado = ""; //nombre estado leido
                     int hasta = strLinea.indexOf("[");
-                    for (int i = 0; i < hasta; i++) { //lee el 1er estado (inicio de la transicion)
+                    for (int i = 4; i < hasta; i++) { //lee el 1er estado (inicio de la transicion)
                         charCorriente = strLinea.charAt(i);
                         estado = estado + charCorriente;
                     }

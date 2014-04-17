@@ -8,7 +8,7 @@ public class NFALambda extends FA {
 	
     /*
     Variables globales para almacenar, representan las 5 partes de la tupla que
-    es el AFD
+    es el AFNLambda
     */
     Set<State> estados;
     Set<Character> alfabeto;

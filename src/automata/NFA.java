@@ -9,7 +9,7 @@ public class NFA extends FA {
 
     /*
     Variables globales para almacenar, representan las 5 partes de la tupla que
-    es el AFD*/
+    es el AFN*/
     Set<State> estados;
     Set<Character> alfabeto;
     Set<Triple<State, Character, State>> delta;
@@ -124,10 +124,12 @@ public class NFA extends FA {
         for(State s:estados){ //buscamos los nombres de los estados
             states.add(s.name());
         }
+        System.out.println("estados: "+states);
         LinkedList<String>finales=new LinkedList();
         for(State f:estados_finales){  //buscamos los nombres de los estados finales
             finales.add(f.name());
         }
+        System.out.println("estados finales: "+finales);
         
         
         for(int i=0; i<states.size();i++){ //verificamos que el estado inicial pertenece al conjunto de estados
@@ -141,6 +143,7 @@ public class NFA extends FA {
         for(Triple<State, Character, State> t : delta){ //verificamos que las transiciones son validas 
             transicionesOk=transicionesOk && (states.contains(t.first().name()) && states.contains(t.third().name()) && alfabeto.contains(t.second())); // (los estados utilizados pertenecen al conjunto de estados y el simbolo utilizado pertenece al alfabeto)
         }
+        System.out.println("transOk: "+transicionesOk+" finalesOk: "+finalesOk+" inicOk: "+inicOk);
         
 		return (inicOk && finalesOk && transicionesOk);
         
