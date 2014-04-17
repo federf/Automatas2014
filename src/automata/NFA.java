@@ -119,6 +119,7 @@ public class NFA extends FA {
         boolean inicOk=false;
         boolean finalesOk=true;
         boolean transicionesOk=true;
+        boolean noLambda=!alfabeto.contains(Lambda); //verificamos que el alfabeto no contiene Lambda
         
         LinkedList<String> states=new LinkedList();
         for(State s:estados){ //buscamos los nombres de los estados
@@ -143,9 +144,9 @@ public class NFA extends FA {
         for(Triple<State, Character, State> t : delta){ //verificamos que las transiciones son validas 
             transicionesOk=transicionesOk && (states.contains(t.first().name()) && states.contains(t.third().name()) && alfabeto.contains(t.second())); // (los estados utilizados pertenecen al conjunto de estados y el simbolo utilizado pertenece al alfabeto)
         }
-        System.out.println("transOk: "+transicionesOk+" finalesOk: "+finalesOk+" inicOk: "+inicOk);
+        System.out.println("transOk: "+transicionesOk+" finalesOk: "+finalesOk+" inicOk: "+inicOk +" noLamda en alfabeto: "+noLambda);
         
-		return (inicOk && finalesOk && transicionesOk);
+		return (inicOk && finalesOk && transicionesOk && noLambda);
         
 	} 
 
