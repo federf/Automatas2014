@@ -136,6 +136,10 @@ public class NFA extends FA {
     public DFA toDFA() {
         assert rep_ok();
         // TODO
+        
+        State q0=new State(inicial.name()); //crea un nuevo estado inicial para el AFD
+        
+        
         return null;
     }
 
@@ -177,4 +181,5 @@ public class NFA extends FA {
 
     }
 
+    
 }

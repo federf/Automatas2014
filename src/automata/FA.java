@@ -207,6 +207,9 @@ public abstract class FA {
                         charCorriente = strLinea.charAt(i);
                         estado = estado + charCorriente;
                     }
+                    if(!nombresEstados.contains(estado)){
+                        nombresEstados.add(estado);
+                    }
                     State s = new State(estado);
                     if (!estados_finales.contains(s)) {
                         estados_finales.add(s);
@@ -237,6 +240,7 @@ public abstract class FA {
                 State e = new State(nombre);
                 estados.add(e);
             }
+            System.out.println("cant estados: "+estados.size());
 
             if (automataACrear.equals("AFNLambda")) {
                 System.out.println("CREO AFNLAMBDA");
