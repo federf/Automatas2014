@@ -14,13 +14,6 @@ public abstract class FA {
 
     public static final Character Lambda = '_';
 
-    // variables para representar los elementos de la 5upla que representan a los automatas
-    /*Set<State> estados;  //conjunto de estados
-     Set<Character> alfabeto; //conjunto de caracteres del alfabeto del automata
-     Set<Triple<State, Character, State>> delta; //conjunto de triplas (estado, caracter, estado) que representan la delta
-     State inicial; //estado inicial
-     Set<State> estados_finales; //conjunto de estados finales*/
-
     /* Creation */
     /**
      * Parses and returns a finite
@@ -50,31 +43,29 @@ public abstract class FA {
     public static FA parse_form_file(String path) throws Exception {
         // TODO
         try {
-            String a = "a";
-            String b = "a";
-            System.out.println(a.equals(b));
-
-            System.out.println(a.compareTo(b));
-
             String automataACrear = "AFD";
-
-            /*******************************ESTADOS***********************/
+            /**
+             * *****************************ESTADOS**********************
+             */
             Set<State> estados = new HashSet<State>();  //conjunto de estados
             LinkedList<String> nombresEstados = new LinkedList<String>(); //lista de los nombres de los estados
-
-            /*******************************ALFABETO***********************/
+            /**
+             * *****************************ALFABETO**********************
+             */
             Set<Character> alfabeto = new HashSet<Character>(); //conjunto de caracteres del alfabeto del automata
-            
-            /*******************************DELTA***********************/
+            /**
+             * *****************************DELTA**********************
+             */
             LinkedList<Triple<State, Character, State>> transiciones = new LinkedList<Triple<State, Character, State>>(); //lista de transiciones para verificar si el AF es Det o NoDet
             Set<Triple<State, Character, State>> delta = new HashSet<Triple<State, Character, State>>(); //conjunto de triplas (estado, caracter, estado) que representan la delta
-            
-            /*******************************ESTADO INICIAL***********************/
+            /**
+             * *****************************ESTADO INICIAL**********************
+             */
             State inicial = null; //estado inicial
-            
-            /*******************************ESTADOS FINALES***********************/
+            /**
+             * *****************************ESTADOS FINALES**********************
+             */
             Set<State> estados_finales = new HashSet<State>(); //conjunto de estados finales
-
             String estadoLeido = "";
             // Abrimos el archivo
             FileInputStream fstream = new FileInputStream(path);
@@ -96,7 +87,6 @@ public abstract class FA {
                     if (nombresEstados.isEmpty()) {
                         nombresEstados.add(estadoLeido);
                     }
-
                     if (!nombresEstados.contains(estadoLeido)) { // si no es vacio el conjunto de estados y no contiene el estado, se lo agrega
                         nombresEstados.add(estadoLeido); //ERROR ACA, NO ESTA BIEN INICIALIZADO EL SET DE ESTADOS AL PARECER
                     }
@@ -113,9 +103,7 @@ public abstract class FA {
                         charCorriente = strLinea.charAt(i);
                         estado = estado + charCorriente;
                     }
-
                     System.out.println("ULTIMO CHAR LEIDO  " + charCorriente);
-
                     State s = new State(estado);
                     estado = estado.trim();
                     System.out.println("ESTADO LEIDO   " + estado);
@@ -134,9 +122,7 @@ public abstract class FA {
                         charCorriente = strLinea.charAt(i);
                         estado2 = estado2 + charCorriente;
                     }
-
                     estado2 = estado2.trim();
-
                     State s2 = new State(estado);
                     System.out.println("---------->>");
                     System.out.println("ESTADO LEIDO  2 " + estado2);
@@ -144,7 +130,6 @@ public abstract class FA {
                     if (!nombresEstados.contains(estado2)) { //si no esta en el conjunto de estados, lo agrega
                         nombresEstados.add(estado2);
                     }
-
                     /**
                      * ****************************************************************
                      */
@@ -166,7 +151,6 @@ public abstract class FA {
                             charCorriente = strLinea.charAt(i);
                             estado = estado + charCorriente;
                         }
-
                         System.out.println("ULTIMO CHAR LEIDO  " + charCorriente);
 
                         State s = new State(estado);
@@ -177,7 +161,6 @@ public abstract class FA {
                         if (!nombresEstados.contains(estado)) { //si no esta incluido en el conjunto de estados
                             nombresEstados.add(estado); // lo agrega
                         }
-
                         /**
                          * ****************************************************
                          */
@@ -190,16 +173,12 @@ public abstract class FA {
                             estado2 = estado2 + charCorriente;
                         }
                         State s2 = new State(estado2);
-
                         estado2 = estado2.trim();
-
                         System.out.println("---------->>");
                         System.out.println("ESTADO LEIDO  2 " + estado2);
-
                         if (!nombresEstados.contains(estado2)) { //si no esta en el conjunto de estados, lo agrega
                             nombresEstados.add(estado2);
                         }
-
                         /**
                          * ******************************************************
                          */
@@ -230,19 +209,20 @@ public abstract class FA {
                     }
                     System.out.println("ESTADO FINAL AGREGADO " + s.name());
                 }
-
             }
             // Cerramos el archivo
             entrada.close();
-            for (int i = 0; i < transiciones.size(); i++) {
-                for (int j = 0; j < transiciones.size(); j++) {
-                    if (i != j) {
-                        Triple<State, Character, State> elem1 = transiciones.get(i);
-                        Triple<State, Character, State> elem2 = transiciones.get(j);
-                        if ((elem1.first().name().equals(elem2.first().name())) && (elem1.second().equals(elem2.second()))) {
-                            automataACrear = "AFN";
-                            i=transiciones.size();
-                            j=transiciones.size();
+            if (automataACrear.equals("AFD")) {
+                for (int i = 0; i < transiciones.size(); i++) {
+                    for (int j = 0; j < transiciones.size(); j++) {
+                        if (i != j) {
+                            Triple<State, Character, State> elem1 = transiciones.get(i);
+                            Triple<State, Character, State> elem2 = transiciones.get(j);
+                            if ((elem1.first().name().equals(elem2.first().name())) && (elem1.second().equals(elem2.second()))) {
+                                automataACrear = "AFN";
+                                i = transiciones.size();
+                                j = transiciones.size();
+                            }
                         }
                     }
                 }

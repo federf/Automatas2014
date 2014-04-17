@@ -1,6 +1,7 @@
 package automata;
 
 import static automata.FA.Lambda;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
@@ -72,8 +73,38 @@ public class NFALambda extends FA {
     public Set<State> delta(State from, Character c) {
         assert states().contains(from);
         assert alphabet().contains(c);
-        // TODO
+        /*if (from != null && !c.equals("")) {
+            // TODO
+            System.out.println("estado from: " + from.name() + " caracter: " + c);
+            LinkedList<Triple<State, Character, State>> transiciones = new LinkedList();
+            for (Triple<State, Character, State> t : delta) {
+                transiciones.add(t);
+            }
+            Set<State> result = new HashSet<State>(); //set de resultado
+            result.add(from);
+            for (int i = 0; i < transiciones.size(); i++) { //buscamos las transiciones desde from por c y agregamos el destino de estas al conjunto resultado
+                Triple<State, Character, State> actual = transiciones.get(i);
+                if (actual.first().name().equals(from.name()) && actual.second().equals(c)) {
+                    result.add(actual.third());
+                }
+            }
+
+            LinkedList<Triple<State, Character, State>> transLambdaEvaluadas = new LinkedList();
+            clausuraLambda(from, transLambdaEvaluadas, result);
+
+            String resultadoNombres = "[";
+            for (State t : result) {
+                resultadoNombres = resultadoNombres + t.name() + ";";
+            }
+            resultadoNombres = resultadoNombres + "]";
+            System.out.println("resultado: " + resultadoNombres);
+            return result;
+        } else {
+            System.out.println("Caracter o Estado Invalido");
+            return new HashSet<State>();
+        }*/
         return null;
+
     }
 
     @Override
@@ -87,7 +118,8 @@ public class NFALambda extends FA {
      *  Automata methods
      */
     @Override
-    public boolean accepts(String string) {
+    public boolean accepts(String string
+    ) {
         assert rep_ok();
         assert string != null;
         assert verify_string(string);
@@ -109,7 +141,7 @@ public class NFALambda extends FA {
 
     @Override
     public boolean rep_ok() {
-		// TODO: Check that initial and final states are included in 'states'.
+        // TODO: Check that initial and final states are included in 'states'.
         // TODO: Check that all transitions are correct. All states and characters should be part of the automaton set of states and alphabet.
         boolean inicOk = false;
         boolean finalesOk = true;
@@ -140,6 +172,45 @@ public class NFALambda extends FA {
         System.out.println("transOk: " + transicionesOk + " finalesOk: " + finalesOk + " inicOk: " + inicOk);
 
         return (inicOk && finalesOk && transicionesOk);
+    }
+
+    /*
+     metodo que dado un estado realiza su clausura lambda
+     sus parametros son el estado inicial de las transiciones
+     y un conjunto de transiciones lambda ya evaluadas (al inicio es vacio, luego se utiliza para
+     no evaluar mas de 1 vez cada transicion lambda)
+     ademas se pasa el conjunto resultado que se actualiza en cada corrida (al inicio debe ser vacio)
+     */
+    private void clausuraLambda(State from, LinkedList<Triple<State, Character, State>> yaEvaluadas, Set<State> result) { //VERIFICAR Y CORREGIR
+        assert states().contains(from);
+        assert alphabet().contains(Lambda);
+        if (from != null) {
+            // TODO
+            LinkedList<Triple<State, Character, State>> transiciones = new LinkedList(); //lista de transiciones lambda a evaluar
+            for (Triple<State, Character, State> t : delta) {
+                if (!yaEvaluadas.contains(t)) { //si la transicion que se quiere agregar aun no fue evaluada
+                    transiciones.add(t); //la agrega a la lista
+                }
+            }
+            result.add(from);
+            LinkedList<String> nombresResult = new LinkedList();
+            for (State s : result) {
+                nombresResult.add(s.name());
+            }
+            for (int i = 0; i < transiciones.size(); i++) { //buscamos las transiciones lambda desde from y agregamos el destino de estas al conjunto resultado
+                Triple<State, Character, State> actual = transiciones.get(i);
+                if (actual.first().name().equals(from.name()) && actual.second().equals(Lambda) && !nombresResult.contains(actual.third().name())) {
+                    result.add(actual.third());
+                    yaEvaluadas.add(actual);
+                }
+            }
+            for (State f : result) {
+                clausuraLambda(f,yaEvaluadas,result);
+            }
+
+        } else {
+            System.out.println("Caracter o Estado Invalido");
+        }
     }
 
 }
