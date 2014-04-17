@@ -74,35 +74,35 @@ public class NFALambda extends FA {
         assert states().contains(from);
         assert alphabet().contains(c);
         /*if (from != null && !c.equals("")) {
-            // TODO
-            System.out.println("estado from: " + from.name() + " caracter: " + c);
-            LinkedList<Triple<State, Character, State>> transiciones = new LinkedList();
-            for (Triple<State, Character, State> t : delta) {
-                transiciones.add(t);
-            }
-            Set<State> result = new HashSet<State>(); //set de resultado
-            result.add(from);
-            for (int i = 0; i < transiciones.size(); i++) { //buscamos las transiciones desde from por c y agregamos el destino de estas al conjunto resultado
-                Triple<State, Character, State> actual = transiciones.get(i);
-                if (actual.first().name().equals(from.name()) && actual.second().equals(c)) {
-                    result.add(actual.third());
-                }
-            }
+         // TODO
+         System.out.println("estado from: " + from.name() + " caracter: " + c);
+         LinkedList<Triple<State, Character, State>> transiciones = new LinkedList();
+         for (Triple<State, Character, State> t : delta) {
+         transiciones.add(t);
+         }
+         Set<State> result = new HashSet<State>(); //set de resultado
+         result.add(from);
+         for (int i = 0; i < transiciones.size(); i++) { //buscamos las transiciones desde from por c y agregamos el destino de estas al conjunto resultado
+         Triple<State, Character, State> actual = transiciones.get(i);
+         if (actual.first().name().equals(from.name()) && actual.second().equals(c)) {
+         result.add(actual.third());
+         }
+         }
 
-            LinkedList<Triple<State, Character, State>> transLambdaEvaluadas = new LinkedList();
-            clausuraLambda(from, transLambdaEvaluadas, result);
+         LinkedList<Triple<State, Character, State>> transLambdaEvaluadas = new LinkedList();
+         clausuraLambda(from, transLambdaEvaluadas, result);
 
-            String resultadoNombres = "[";
-            for (State t : result) {
-                resultadoNombres = resultadoNombres + t.name() + ";";
-            }
-            resultadoNombres = resultadoNombres + "]";
-            System.out.println("resultado: " + resultadoNombres);
-            return result;
-        } else {
-            System.out.println("Caracter o Estado Invalido");
-            return new HashSet<State>();
-        }*/
+         String resultadoNombres = "[";
+         for (State t : result) {
+         resultadoNombres = resultadoNombres + t.name() + ";";
+         }
+         resultadoNombres = resultadoNombres + "]";
+         System.out.println("resultado: " + resultadoNombres);
+         return result;
+         } else {
+         System.out.println("Caracter o Estado Invalido");
+         return new HashSet<State>();
+         }*/
         return null;
 
     }
@@ -110,8 +110,26 @@ public class NFALambda extends FA {
     @Override
     public String to_dot() {
         assert rep_ok();
+        assert rep_ok();
         // TODO
-        return null;
+        String result = "digraph {\n";
+        result = result + "    "+"inic[shape=point];\n";
+        result = result + "    "+"inic->" + inicial.name() + ";\n";
+        String transiciones = "\n"; //cadena con las transiciones normales
+        String transLambda = "\n"; //cadena con las transiciones lambda
+        for (Triple<State, Character, State> t : delta) {
+            if (!t.second().equals(Lambda)) {
+                transiciones = transiciones +"    "+ t.first().name() + "->" + t.third().name() + "[label=" + '"' + t.second() + '"' + "];\n";
+            } else {
+                transLambda = transLambda +"    "+ t.first().name() + "->" + t.third().name() + "[label=" + '"' + t.second() + '"' + "];\n";
+            }
+        }
+        String finales = "\n";
+        for (State s : estados_finales) {
+            finales = finales +"    "+ s.name() + "[shape=doublecircle];\n";
+        }
+        result = result + transiciones +transLambda+ finales + "}";
+        return result;
     }
 
     /*
@@ -205,7 +223,7 @@ public class NFALambda extends FA {
                 }
             }
             for (State f : result) {
-                clausuraLambda(f,yaEvaluadas,result);
+                clausuraLambda(f, yaEvaluadas, result);
             }
 
         } else {

@@ -123,7 +123,7 @@ public abstract class FA {
                         estado2 = estado2 + charCorriente;
                     }
                     estado2 = estado2.trim();
-                    State s2 = new State(estado);
+                    State s2 = new State(estado2);
                     System.out.println("---------->>");
                     System.out.println("ESTADO LEIDO  2 " + estado2);
 
@@ -136,7 +136,9 @@ public abstract class FA {
                     if (!alfabeto.contains(Lambda)) { //agrega lambda al alfabeto
                         alfabeto.add(Lambda);
                     }
-                    Triple t = new Triple(s, Lambda, s2);
+                    Triple<State,Character,State> t = new Triple<State, Character, State>(s, Lambda, s2);
+                    System.out.println("trans Lambda agregada: "+t.first().name().toString()+"->"+t.second().toString()+"->"+t.third().name().toString());
+
                     if (!delta.contains(t)) {
                         delta.add(t);
                         transiciones.add(t);
@@ -186,7 +188,9 @@ public abstract class FA {
                         if (!alfabeto.contains(label)) { //si no esta incluida en el alfabetos
                             alfabeto.add(label); //la agrega
                         }
-                        Triple t = new Triple(s, label, s2);
+                        Triple<State,Character,State> t = new Triple<State, Character, State>(s, label, s2);
+                        System.out.println("trans Lambda agregada: "+t.first().name().toString()+"->"+t.second().toString()+"->"+t.third().name().toString());
+                        
                         if (!delta.contains(t)) {
                             delta.add(t);
                             transiciones.add(t);

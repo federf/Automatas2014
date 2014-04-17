@@ -100,7 +100,19 @@ public class NFA extends FA {
     public String to_dot() {
         assert rep_ok();
         // TODO
-        return null;
+        String result="digraph {\n";
+        result=result+"    "+"inic[shape=point];\n";
+        result=result+"    "+"inic->"+inicial.name()+";\n";
+        String transiciones="\n"; //cadena con las transiciones
+        for(Triple<State,Character,State> t:delta){
+            transiciones=transiciones+"    "+t.first().name()+"->"+t.third().name()+"[label="+'"'+t.second()+'"'+"];\n";
+        }
+        String finales="\n";
+        for(State s:estados_finales){
+            finales=finales+"    "+s.name()+"[shape=doublecircle];\n";
+        }
+        result=result+transiciones+"\n"+finales+"}";
+        return result;
     }
 
     /*
