@@ -73,37 +73,39 @@ public class NFALambda extends FA {
     public Set<State> delta(State from, Character c) {
         assert states().contains(from);
         assert alphabet().contains(c);
-        /*if (from != null && !c.equals("")) {
-         // TODO
-         System.out.println("estado from: " + from.name() + " caracter: " + c);
-         LinkedList<Triple<State, Character, State>> transiciones = new LinkedList();
-         for (Triple<State, Character, State> t : delta) {
-         transiciones.add(t);
-         }
-         Set<State> result = new LinkedHashSet<State>(); //set de resultado
-         result.add(from);
-         for (int i = 0; i < transiciones.size(); i++) { //buscamos las transiciones desde from por c y agregamos el destino de estas al conjunto resultado
-         Triple<State, Character, State> actual = transiciones.get(i);
-         if (actual.first().name().equals(from.name()) && actual.second().equals(c)) {
-         result.add(actual.third());
-         }
-         }
-
-         LinkedList<Triple<State, Character, State>> transLambdaEvaluadas = new LinkedList();
-         clausuraLambda(from, transLambdaEvaluadas, result);
-
-         String resultadoNombres = "[";
-         for (State t : result) {
-         resultadoNombres = resultadoNombres + t.name() + ";";
-         }
-         resultadoNombres = resultadoNombres + "]";
-         System.out.println("resultado: " + resultadoNombres);
-         return result;
-         } else {
-         System.out.println("Caracter o Estado Invalido");
-         return new LinkedHashSet<State>();
-         }*/
-        return null;
+        LinkedList<Triple<State, Character, State>> trans = new LinkedList();
+        Set<State> h = clausuraLambda(from, trans);
+        System.out.println("Estados clausura E:");
+        for (State s : h) {
+            System.out.println(" " + s.name());
+        }
+        if (from != null && !c.equals("")) {
+            // TODO
+            System.out.println("estado from: " + from.name() + " caracter: " + c);
+            LinkedList<Triple<State, Character, State>> transiciones = new LinkedList();
+            for (Triple<State, Character, State> t : delta) {
+                transiciones.add(t);
+            }
+            Set<State> result = new LinkedHashSet<State>(); //set de resultado
+            result.add(from);
+            for (int i = 0; i < transiciones.size(); i++) { //buscamos las transiciones desde from por c y agregamos el destino de estas al conjunto resultado
+                Triple<State, Character, State> actual = transiciones.get(i);
+                if (actual.first().name().equals(from.name()) && actual.second().equals(c)) {
+                    result.add(actual.third());
+                }
+            }
+            String resultadoNombres = "[";
+            for (State t : result) {
+                resultadoNombres = resultadoNombres + t.name() + ";";
+            }
+            resultadoNombres = resultadoNombres + "]";
+            System.out.println("resultado: " + resultadoNombres);
+            result.addAll(h);
+            return result;
+        } else {
+            System.out.println("Caracter o Estado Invalido");
+            return new LinkedHashSet<State>();
+        }
 
     }
 
@@ -113,22 +115,22 @@ public class NFALambda extends FA {
         assert rep_ok();
         // TODO
         String result = "digraph {\n";
-        result = result + "    "+"inic[shape=point];\n";
-        result = result + "    "+"inic->" + inicial.name() + ";\n";
+        result = result + "    " + "inic[shape=point];\n";
+        result = result + "    " + "inic->" + inicial.name() + ";\n";
         String transiciones = "\n"; //cadena con las transiciones normales
         String transLambda = "\n"; //cadena con las transiciones lambda
         for (Triple<State, Character, State> t : delta) {
             if (!t.second().equals(Lambda)) {
-                transiciones = transiciones +"    "+ t.first().name() + "->" + t.third().name() + "[label=" + '"' + t.second() + '"' + "];\n";
+                transiciones = transiciones + "    " + t.first().name() + "->" + t.third().name() + "[label=" + '"' + t.second() + '"' + "];\n";
             } else {
-                transLambda = transLambda +"    "+ t.first().name() + "->" + t.third().name() + "[label=" + '"' + t.second() + '"' + "];\n";
+                transLambda = transLambda + "    " + t.first().name() + "->" + t.third().name() + "[label=" + '"' + t.second() + '"' + "];\n";
             }
         }
         String finales = "\n";
         for (State s : estados_finales) {
-            finales = finales +"    "+ s.name() + "[shape=doublecircle];\n";
+            finales = finales + "    " + s.name() + "[shape=doublecircle];\n";
         }
-        result = result + transiciones +transLambda+ finales + "}";
+        result = result + transiciones + transLambda + finales + "}";
         return result;
     }
 
@@ -193,41 +195,43 @@ public class NFALambda extends FA {
     }
 
     /*
-     metodo que dado un estado realiza su clausura lambda
-     sus parametros son el estado inicial de las transiciones
-     y un conjunto de transiciones lambda ya evaluadas (al inicio es vacio, luego se utiliza para
-     no evaluar mas de 1 vez cada transicion lambda)
-     ademas se pasa el conjunto resultado que se actualiza en cada corrida (al inicio debe ser vacio)
+     metodo que calcula la clausura lambda de un estado.
+     recibe como parametros el estado, y una lista de transiciones que llevara registro de las transiciones ya evaluadas
+     para evitar repeticiones durante la recursion
      */
-    private void clausuraLambda(State from, LinkedList<Triple<State, Character, State>> yaEvaluadas, Set<State> result) { //VERIFICAR Y CORREGIR
-        assert states().contains(from);
-        assert alphabet().contains(Lambda);
-        if (from != null) {
-            // TODO
-            LinkedList<Triple<State, Character, State>> transiciones = new LinkedList(); //lista de transiciones lambda a evaluar
-            for (Triple<State, Character, State> t : delta) {
-                if (!yaEvaluadas.contains(t)) { //si la transicion que se quiere agregar aun no fue evaluada
-                    transiciones.add(t); //la agrega a la lista
-                }
+    public Set<State> clausuraLambda(State s, LinkedList<Triple<State, Character, State>> t) {
+        LinkedList<State> e = new LinkedList(); //lista de estados que luego formaran el resultado
+        Set<State> result = new LinkedHashSet(); //conjunto resultado
+        Set<State> resultRecursivo = new LinkedHashSet(); //conjunto resultado recursividad
+        e.add(s);
+        LinkedList<Triple<State, Character, State>> transLambdaYaEvaluadas = t; //lista que lleva registro de las trans lambda ya evaluadas para no repetir
+        //su evaluacion
+        LinkedList<Triple<State, Character, State>> transLambda = new LinkedList();//lista de transiciones lambda existentes pertenecientes al estado
+        for (Triple<State, Character, State> trans : delta) { //para toda transicion
+            if (trans.first().name().equals(s.name()) && trans.second().equals(Lambda)) { //si es lambda y no esta incluida en la lista de transiciones lambda
+                transLambda.add(trans); //se agrega a la lista de transiciones lamdba que salen del estado parametro
             }
-            result.add(from);
-            LinkedList<String> nombresResult = new LinkedList();
-            for (State s : result) {
-                nombresResult.add(s.name());
+        }
+        for (int i = 0; i < transLambda.size(); i++) {
+            if (!transLambdaYaEvaluadas.contains(transLambda.get(i))) { //si aun no se evaluo la transicion corriente
+                e.add(transLambda.get(i).third()); //agregamos el estado a cual llega al conjunto clausura
+                transLambdaYaEvaluadas.add(transLambda.get(i)); //marcamos la transicion como ya evaluada, agregandola a la lista de transiciones lambda evaluadas
             }
-            for (int i = 0; i < transiciones.size(); i++) { //buscamos las transiciones lambda desde from y agregamos el destino de estas al conjunto resultado
-                Triple<State, Character, State> actual = transiciones.get(i);
-                if (actual.first().name().equals(from.name()) && actual.second().equals(Lambda) && !nombresResult.contains(actual.third().name())) {
-                    result.add(actual.third());
-                    yaEvaluadas.add(actual);
-                }
+        }
+        for (int i = 0; i < e.size(); i++) {
+            result.add(e.get(i));
+        }
+        for (int i = 0; i < e.size(); i++) { //llamada recursiva
+            if(!e.get(i).name().equals(s.name())){
+                resultRecursivo = clausuraLambda(e.get(i), transLambdaYaEvaluadas);
+                result.addAll(resultRecursivo);
             }
-            for (State f : result) {
-                clausuraLambda(f, yaEvaluadas, result);
-            }
-
-        } else {
-            System.out.println("Caracter o Estado Invalido");
+        }
+        
+        if(result.isEmpty()){
+            return new LinkedHashSet();
+        }else{
+            return result;
         }
     }
 

@@ -180,6 +180,5 @@ public class NFA extends FA {
         return (inicOk && finalesOk && transicionesOk && noLambda);
 
     }
-
     
 }
