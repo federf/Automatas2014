@@ -149,14 +149,14 @@ public class NFALambda extends FA {
         assert string != null;
         assert verify_string(string);
         //calcular la delta acumulada de string y luego comparar el conjunto retornado con el conj de estados finales
-        Set<State> deltaAcum = deltaAcumulada(string);
+        //Set<State> deltaAcum = deltaAcumulada(string);
         boolean accepted = false;
-        for (State s : deltaAcum) { //al final, el ultimo conjunto de estados contiene al menos un estado final
+        /*for (State s : deltaAcum) { //al final, el ultimo conjunto de estados contiene al menos un estado final
             for (State s2 : estados_finales) {
                 System.out.println("estado obtenido?: " + s.name() + " comparado a: " + s2.name());
                 accepted = accepted || (s.name().equals(s2.name())); //si es asi, la cadena es aceptada
             }
-        }
+        }*/
 
         return accepted;
     }
