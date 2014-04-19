@@ -72,10 +72,10 @@ public class DFA extends FA {
         assert alphabet().contains(c);
         if (from != null && !c.equals("")) {
             if(tieneTransicion(from, c)){
-                LinkedList<Triple<State, Character, State>> transiciones = new LinkedList();
-                for (Triple<State, Character, State> t : delta) {
+                LinkedList<Triple<State, Character, State>> transiciones = new LinkedList(delta);
+                /*for (Triple<State, Character, State> t : delta) {
                     transiciones.add(t);
-                }
+                }*/
                 State result = new State("");
                 for (int i = 0; i < transiciones.size(); i++) {
                     Triple<State, Character, State> actual = transiciones.get(i);
@@ -282,10 +282,9 @@ public class DFA extends FA {
             finalesOk = finalesOk && (states.contains(finales.get(i)));
         }
 
-        LinkedList<Triple<State, Character, State>> transiciones = new LinkedList<Triple<State, Character, State>>(); //lista de transiciones para verificar si el AF es Det o NoDet
+        LinkedList<Triple<State, Character, State>> transiciones = new LinkedList<Triple<State, Character, State>>(delta); //lista de transiciones para verificar si el AF es Det o NoDet
         for (Triple<State, Character, State> t : delta) { //verificamos que las transiciones son validas 
             transicionesOk = transicionesOk && (states.contains(t.first().name()) && states.contains(t.third().name()) && alfabeto.contains(t.second())); // (los estados utilizados pertenecen al conjunto de estados y el simbolo utilizado pertenece al alfabeto)
-            transiciones.add(t);
         }
         for (int i = 0; i < transiciones.size(); i++) { //ciclo para determinar si el automata es deterministico o no
             for (int j = 0; j < transiciones.size(); j++) {

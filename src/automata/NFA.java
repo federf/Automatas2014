@@ -71,10 +71,10 @@ public class NFA extends FA {
         assert states().contains(from);
         assert alphabet().contains(c);
         if (from != null && !c.equals("")) {// si from no es null y la cadena no es vacia (para lambda corresponde usar '_')
-            LinkedList<Triple<State, Character, State>> transiciones = new LinkedList();
-            for (Triple<State, Character, State> t : delta) {
+            LinkedList<Triple<State, Character, State>> transiciones = new LinkedList(delta);
+            /*for (Triple<State, Character, State> t : delta) {
                 transiciones.add(t);
-            }
+            }*/
             Set<State> result = new LinkedHashSet<State>(); //set de resultado
             for (int i = 0; i < transiciones.size(); i++) {
                 Triple<State, Character, State> actual = transiciones.get(i);
@@ -198,14 +198,14 @@ public class NFA extends FA {
     
     public Set<State> deltaAcumulada(Set<State> est, String string) {
         //System.out.println("estados: " + est.toString() + " string: " + string);
-        LinkedList<State> listaEstados = new LinkedList(); //conjunto de estados para la 1er aplicacion
+        LinkedList<State> listaEstados = new LinkedList(est); //conjunto de estados para la 1er aplicacion
         LinkedHashSet<State> result = new LinkedHashSet();
         LinkedHashSet<State> resultadoParcial = new LinkedHashSet();//lista de estados ya obtenidos
         LinkedList<String> nombresResParcial = new LinkedList();//lista de nombres de los estados que ya se tienen
         if (!est.isEmpty() && !string.isEmpty()) {
-            for (State s : est) { //buscamos todos los estados pasados como parametros
+            /*for (State s : est) { //buscamos todos los estados pasados como parametros
                 listaEstados.add(s);
-            }
+            }*/
             for (int i = 0; i < listaEstados.size(); i++) { //calculamos la delta de todo el conjunto de estados parametro con el 1er elemento de la cadena
                 LinkedHashSet<State> conUnChar = (LinkedHashSet<State>) delta(listaEstados.get(i), string.charAt(0));//obtenemos la delta de todo el conjunto de estados con el 1er elemento de la cadena
                 LinkedList<String> nombresEstadosObtenidos = new LinkedList();
