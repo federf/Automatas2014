@@ -71,23 +71,27 @@ public class DFA extends FA {
         assert states().contains(from);
         assert alphabet().contains(c);
         if (from != null && !c.equals("")) {
-            // TODO
-            LinkedList<Triple<State, Character, State>> transiciones = new LinkedList();
-            for (Triple<State, Character, State> t : delta) {
-                transiciones.add(t);
-            }
-            State result = null;
-            for (int i = 0; i < transiciones.size(); i++) {
-                Triple<State, Character, State> actual = transiciones.get(i);
-                if (actual.first().name().equals(from.name()) && actual.second().equals(c)) {
-                    result = (actual.third());
+            if(tieneTransicion(from, c)){
+                LinkedList<Triple<State, Character, State>> transiciones = new LinkedList();
+                for (Triple<State, Character, State> t : delta) {
+                    transiciones.add(t);
                 }
+                State result = new State("");
+                for (int i = 0; i < transiciones.size(); i++) {
+                    Triple<State, Character, State> actual = transiciones.get(i);
+                    if (actual.first().name().equals(from.name()) && actual.second().equals(c)) {
+                        result = (actual.third());
+                    }
+                }
+                System.out.println("resultado desde " + from.name() + " con " + c + ": " + result.name());
+                return result;
+            }else{
+                System.out.println("no hay transicion desde "+from.name()+" con "+c);
+                return new State("");
             }
-            System.out.println("resultado: " + result.name());
-            return result;
         } else {
             System.out.println("Caracter o Estado Invalido");
-            return null;
+            return new State("");
         }
     }
 
@@ -95,18 +99,18 @@ public class DFA extends FA {
     public String to_dot() {
         assert rep_ok();
         // TODO
-        String result="digraph {\n";
-        result=result+"    "+"inic[shape=point];\n";
-        result=result+"    "+"inic->"+inicial.name()+";\n";
-        String transiciones="\n"; //cadena con las transiciones
-        for(Triple<State,Character,State> t:delta){
-            transiciones=transiciones+"    "+t.first().name()+"->"+t.third().name()+"[label="+'"'+t.second()+'"'+"];\n";
+        String result = "digraph {\n";
+        result = result + "    " + "inic[shape=point];\n";
+        result = result + "    " + "inic->" + inicial.name() + ";\n";
+        String transiciones = "\n"; //cadena con las transiciones
+        for (Triple<State, Character, State> t : delta) {
+            transiciones = transiciones + "    " + t.first().name() + "->" + t.third().name() + "[label=" + '"' + t.second() + '"' + "];\n";
         }
-        String finales="\n";
-        for(State s:estados_finales){
-            finales=finales+"    "+s.name()+"[shape=doublecircle];\n";
+        String finales = "\n";
+        for (State s : estados_finales) {
+            finales = finales + "    " + s.name() + "[shape=doublecircle];\n";
         }
-        result=result+transiciones+"\n"+finales+"}";
+        result = result + transiciones + "\n" + finales + "}";
         return result;
     }
 
@@ -118,8 +122,22 @@ public class DFA extends FA {
         assert rep_ok();
         assert string != null;
         assert verify_string(string);
-        // TODO
-        return false;
+        if (rep_ok() && (string != null) && verify_string(string)) {
+            LinkedList<State> estadosFinales = new LinkedList(estados_finales);
+            State resultadoDeltaAcum = deltaAcumulada(inicial, string);
+            boolean result = false;
+            if (!resultadoDeltaAcum.name().equals("")) {
+                for (int i = 0; i < estadosFinales.size(); i++) {
+                    State unFinal = estadosFinales.get(i);
+                    result = result || (resultadoDeltaAcum.name().equals(unFinal.name()));
+                }
+                return result;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -251,12 +269,10 @@ public class DFA extends FA {
         for (State s : estados) { //buscamos los nombres de los estados
             states.add(s.name());
         }
-        System.out.println("estados: " + states);
         LinkedList<String> finales = new LinkedList();
         for (State f : estados_finales) {  //buscamos los nombres de los estados finales
             finales.add(f.name());
         }
-        System.out.println("estados finales: " + finales);
 
         for (int i = 0; i < states.size(); i++) { //verificamos que el estado inicial pertenece al conjunto de estados
             inicOk = inicOk || (states.get(i).equals(inicial.name()));
@@ -284,11 +300,41 @@ public class DFA extends FA {
                 }
             }
         }
-
-        System.out.println("transOk: " + transicionesOk + " finalesOk: " + finalesOk + " inicOk: " + inicOk + " noLamda en alfabeto: " + noLambda + " deterministicOk: " + deterministicOk);
-
         return (inicOk && finalesOk && transicionesOk && noLambda && deterministicOk);
 
     }
 
+    public State deltaAcumulada(State est, String string) {
+        System.out.println("");
+        if (est != null && !string.isEmpty()) {
+            State result=est;
+            State parcial;
+            for(int i=0; i<string.length(); i++){
+                parcial=delta(result, string.charAt(i));
+                System.out.println("delta desde "+result.name()+" con "+string.charAt(i)+": "+parcial.name());
+                if(parcial.name().equals("")){
+                    System.out.println("res parcial vacio con "+result.name()+" y "+string.charAt(i));
+                    i=string.length();
+                }
+                result=parcial;
+            }
+            System.out.println("resultado delta acumulada desde "+est.name()+" con "+string+": "+result.name());
+            return result;
+        } else {
+            return est;
+        }
+
+    }
+    
+    /*
+    metodo que dado un estado y un caracter c devuelve true si existe una transicion
+    saliente desde el estado con etiqueta c
+    */
+    public boolean tieneTransicion(State s, Character c){
+        boolean result=false;
+        for(Triple<State, Character, State> t: delta){
+            result=result || (t.first().name().equals(s.name()) && t.second().equals(c));
+        }
+        return result;
+    }
 }

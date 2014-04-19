@@ -337,7 +337,7 @@ public abstract class FA {
         // TODO
         boolean verify = true;
         for (int i = 0; i < s.length(); i++) {
-            verify = verify && (alphabet().contains(s.charAt(i)));
+            verify = verify && (this.alphabet().contains(s.charAt(i)));
         }
         return verify;
     }

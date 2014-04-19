@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.TreeSet;
 
 import utils.Triple;
 
@@ -141,24 +142,28 @@ public class NFALambda extends FA {
     @Override
     public boolean accepts(String string
     ) {
-
         System.out.println();
         System.out.println("acepta " + string + "?");
 
         assert rep_ok();
         assert string != null;
         assert verify_string(string);
-        //calcular la delta acumulada de string y luego comparar el conjunto retornado con el conj de estados finales
-        //Set<State> deltaAcum = deltaAcumulada(string);
-        boolean accepted = false;
-        /*for (State s : deltaAcum) { //al final, el ultimo conjunto de estados contiene al menos un estado final
-            for (State s2 : estados_finales) {
-                System.out.println("estado obtenido?: " + s.name() + " comparado a: " + s2.name());
-                accepted = accepted || (s.name().equals(s2.name())); //si es asi, la cadena es aceptada
-            }
-        }*/
-
-        return accepted;
+        if (rep_ok() && (string != null) && verify_string(string)) {
+            //calcular la delta acumulada de string y luego comparar el conjunto retornado con el conj de estados finales
+            /*LinkedHashSet<State> acum = new LinkedHashSet();  //lista de estados
+            acum.add(inicial); //agregamos el inicial
+            Set<State> deltaAcum = deltaAcumulada(acum, string); //aplicamos la delta acumulada*/
+            boolean accepted = false;
+            /*for (State s : deltaAcum) { //al final, el ultimo conjunto de estados contiene al menos un estado final
+                for (State s2 : estados_finales) {
+                    System.out.println("estado obtenido?: " + s.name() + " comparado a: " + s2.name());
+                    accepted = accepted || (s.name().equals(s2.name())); //si es asi, la cadena es aceptada
+                }
+            }*/
+            return accepted;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -251,62 +256,74 @@ public class NFALambda extends FA {
 
     /*
      metodo que dada una string calcula la delta acumulada
+     ademas requiere de un conjunto de estados sobre los cuales comenzar a aplicar
+     al inicio se le pasaria un conj que contiene el estado inicial
      */
-    public Set<State> deltaAcumulada(String string) {
-        LinkedHashSet<State> initial = new LinkedHashSet(); //set desde el cual se calculara la delta
-        initial.add(inicial); //al inicio comienza con el estado inicial solo
-        LinkedHashSet<State> resultGen; //resultado generado por delta
-        resultGen = (LinkedHashSet<State>) delta(inicial, string.charAt(0));//conjunto inicial
-        System.out.println("estado evaluado: " + inicial.name() + " caracter: " + string.charAt(0));
-        System.out.println("estados generados: ");
-        for (State s : resultGen) {
-            System.out.println(s.name());
-        }
-        if (string.length() > 1) {
-            int i = 1;
-            while (i < string.length() && !resultGen.isEmpty()) {
-                System.out.println("");
-                System.out.println("estados disponibles");
-                for (State s : resultGen) {
-                    System.out.println(s.name());
-                }
-                LinkedList<String> nombresResultGenNuevo=new LinkedList();// lista total de nombres generados para el conjunto
-                LinkedHashSet<State> resultGenNuevo=new LinkedHashSet();//resultado nuevo de aplicar delta con el siguiente caracter a todos los estados anteriores
-                for (State s : resultGen) { //para cada estado en el conjunto de estados desde donde se calcula la delta
-                    Character c = string.charAt(i); //con el i-esimo caracter de string
-                    System.out.println("estado evaluado: " + s.name());
-                    System.out.println("caracter evaluado: " + c);
-                    LinkedList<String> nombresEstados = new LinkedList();
-                    Set<State> unResultActual = (LinkedHashSet<State>) delta(s, c); //delta calculada con el caracter actual y uno de los estados del conjunto
-                    for (State s2 : unResultActual) { //obtenemos los nombres de los estados generados
-                        nombresEstados.add(s2.name());
-                    }
-                    LinkedList<String> resultActualNombres = new LinkedList(); //lista de nombres de estados obtenidos
-                    for (String t : nombresEstados) { //vemos que estados falta agregar al conjunto resultado (verificamos por nombre solo)
-                        if (!resultActualNombres.contains(t)) {
-                            resultActualNombres.add(t); //y los agregamos a la lista de nombres
-                        }
-                    }
-                    
-                    
-                    for (String t : nombresEstados) { //vemos que estados falta agregar al conjunto resultado (verificamos por nombre solo)
-                        if (!resultActualNombres.contains(t)) {
-                            resultActualNombres.add(t); //y los agregamos a la lista de nombres
-                        }
-                    }
-                }
-                for(String str:nombresResultGenNuevo){ //generamos la nueva lista de estados
-                    State nuevo=new State(str);
-                    resultGenNuevo.add(nuevo);
-                }
-                //resultGen=resultGenNuevo; //reescribimos el conjunto de proximos estados a evaluar
-                System.out.println("Estados obtenidos por delta: ");
-                for (State s : resultGen) {
-                    System.out.println(s.name());
-                }
-                i++;
+    public Set<State> deltaAcumulada(Set<State> est, String string) {
+        /*System.out.println("estados: " + est.toString() + " string: " + string);
+        LinkedList<State> listaEstados = new LinkedList(); //conjunto de estados para la 1er aplicacion
+        LinkedHashSet<State> result = new LinkedHashSet();
+        LinkedHashSet<State> resultadoParcial = new LinkedHashSet();//lista de estados ya obtenidos
+        LinkedList<String> nombresResParcial = new LinkedList();//lista de nombres de los estados que ya se tienen
+        if (!est.isEmpty() && !string.isEmpty()) {
+            for (State s : est) { //buscamos todos los estados pasados como parametros
+                listaEstados.add(s);
             }
-        }
-        return resultGen;
+            for (int i = 0; i < listaEstados.size(); i++) { //calculamos la delta de todo el conjunto de estados parametro con el 1er elemento de la cadena
+                LinkedHashSet<State> conUnChar = (LinkedHashSet<State>) delta(listaEstados.get(i), string.charAt(0));//obtenemos la delta de todo el conjunto de estados con el 1er elemento de la cadena
+                LinkedList<String> nombresEstadosObtenidos = new LinkedList();
+                for (State s : conUnChar) { //leemos todos los nombres de los estados obtenidos con delta
+                    nombresEstadosObtenidos.add(s.name());
+                }
+                nombresResParcial.clear();
+                for (State s : resultadoParcial) {//actualizamos los nombres de los estados que ya se tienen
+                    nombresResParcial.add(s.name());
+                }
+                for (int j = 0; j < nombresEstadosObtenidos.size(); j++) { //para todo nombre en la lista de nombres de elementos obtenidos por delta
+                    if (!nombresResParcial.contains(nombresEstadosObtenidos.get(j))) { //si no esta incluido en la lista de nombres de estados ya obtenidos
+                        nombresResParcial.add(nombresEstadosObtenidos.get(j)); //se lo agrega
+                    }
+                }
+            }
+            resultadoParcial.clear();//vaciamos la lista de resultado parcial(por si acaso no estaba vacia)
+            if (!nombresResParcial.isEmpty()) {// si la lista de proximos elementos no es vacia
+                for (String s : nombresResParcial) { //agregamos los estados correspondientes
+                    State nuevo = new State(s);
+                    resultadoParcial.add(nuevo);
+                }
+            } else { //sino devolvemos lista vacia
+                return new LinkedHashSet();
+            }
+            String substring = string.substring(1);
+            result = (LinkedHashSet<State>) deltaAcumulada(resultadoParcial, substring);
+            return result;
+        } else {
+            if (string.isEmpty()) {
+                System.out.println("cadena vacia ");
+                return est;
+            } else {
+                System.out.println("conjunto de estados vacio");
+                return new LinkedHashSet<State>();
+            }
+        }*/
+        return null;
     }
+
+    /*
+     metodo que dado un estado y un caracter retorna true si tiene transicion etiquetada con el caracter
+     o alguna transicion lambda
+     */
+    /*public boolean tieneTransiciones(State s, Character c) {
+     boolean result = false;
+     LinkedList<Triple<State, Character, State>> trans = new LinkedList();
+     for (Triple<State, Character, State> t : delta) {
+     trans.add(t);
+     }
+     for (int i = 0; i < trans.size(); i++) {
+     Triple<State, Character, State> actual = trans.get(i);
+     result = result || (actual.first().name().equals(s.name()) && (actual.second().equals(c)));
+     result = result || (actual.first().name().equals(s.name()) && (actual.second().equals(Lambda)));
+     }
+     return result;
+     }*/
 }
