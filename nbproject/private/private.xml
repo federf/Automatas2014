@@ -5,7 +5,7 @@
             <url>src/automata/NFALambda.java</url>
             <bookmark id="1">
                 <name/>
-                <line>142</line>
+                <line>140</line>
                 <key/>
             </bookmark>
         </file>
@@ -13,19 +13,16 @@
             <url>src/Main.java</url>
             <bookmark id="2">
                 <name/>
-                <line>16</line>
+                <line>19</line>
                 <key/>
             </bookmark>
         </file>
     </editor-bookmarks>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/fede/Escritorio/Automatas2014/src/test/nfalambda1.dot</file>
             <file>file:/home/fede/Escritorio/Automatas2014/src/automata/NFALambda.java</file>
-            <file>file:/home/fede/Escritorio/Automatas2014/src/automata/FA.java</file>
-            <file>file:/home/fede/Escritorio/Automatas2014/src/automata/NFA.java</file>
-            <file>file:/home/fede/Escritorio/Automatas2014/src/automata/DFA.java</file>
             <file>file:/home/fede/Escritorio/Automatas2014/src/Main.java</file>
+            <file>file:/home/fede/Escritorio/Automatas2014/src/automata/DFA.java</file>
         </group>
     </open-files>
 </project-private>

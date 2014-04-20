@@ -1,11 +1,9 @@
 package automata;
 
 import static automata.FA.Lambda;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Set;
-import java.util.TreeSet;
 
 import utils.Triple;
 
@@ -130,7 +128,7 @@ public class NFALambda extends FA {
     /*
      *  Automata methods
      */
-    @Override
+    @Override //CONSULTAR, TENGO UN PROBLEMA CON EL TEMA DE LAS LLAMADAS CON LAMBDA EN DELTAACUMULADA
     public boolean accepts(String string
     ) {
         System.out.println();
