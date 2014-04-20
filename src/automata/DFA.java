@@ -164,7 +164,11 @@ public class DFA extends FA {
         
         assert rep_ok();
         // TODO
-        return null;
+        Triple<State,Character,State> noDet=new Triple<State,Character,State>(this.initial_state(),Lambda,this.initial_state());
+        LinkedHashSet<Triple<State,Character,State>> deltaLambda=new LinkedHashSet(this.delta);
+        deltaLambda.add(noDet);
+        NFALambda result=new NFALambda(this.states(),this.alphabet(),deltaLambda,this.inicial,this.final_states());
+        return result;
     }
 
     /**
