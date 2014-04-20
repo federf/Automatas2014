@@ -202,7 +202,27 @@ public class DFA extends FA {
     public DFA complement() {
         assert rep_ok();
         // TODO
-        return null;
+        LinkedHashSet<State> new_final_states=new LinkedHashSet();//nuevo conjunto de estados finales;
+        LinkedList<String> estadosDFA=new LinkedList(); //obtenemos los nombres de los estados que posee el automata original
+        for(State s: this.states()){ //obtenemos todos los nombres uno por uno
+            estadosDFA.add(s.name());
+        }
+        LinkedList<String> nombresFinalesDFA=new LinkedList();//lista de nombres de los estados finales del DFA original
+        for(State s:this.final_states()){ //obtenemos los nombres de los estados finales del dfa original
+            nombresFinalesDFA.add(s.name());
+        }
+        LinkedList<String> new_nombresFinalesDFA=new LinkedList(); //lista de nombres de los nuevos estados finales
+        for(String unNombre: estadosDFA){//para todo estado
+            if(!nombresFinalesDFA.contains(unNombre)){ //tal que no era final en el DFA original
+                new_nombresFinalesDFA.add(unNombre); //lo convertimos en estado final del nuevo DFA
+            }
+        }
+        for(String nombre_final:new_nombresFinalesDFA){
+            new_final_states.add(new State(nombre_final));
+        }
+        DFA complemento=new DFA(this.states(),this.alphabet(),this.delta,this.initial_state(),new_final_states);//retornamos un automata finito deterministico
+        //cuyos estados finales son todos los estados que antes no eran finales en el automata original
+        return complemento;
     }
 
     /**

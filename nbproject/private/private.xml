@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="2">
         <file>
             <url>src/automata/NFALambda.java</url>
             <bookmark id="1">
                 <name/>
-                <line>151</line>
+                <line>142</line>
+                <key/>
+            </bookmark>
+        </file>
+        <file>
+            <url>src/Main.java</url>
+            <bookmark id="2">
+                <name/>
+                <line>16</line>
                 <key/>
             </bookmark>
         </file>
@@ -16,6 +24,7 @@
             <file>file:/home/fede/Escritorio/Automatas2014/src/automata/NFALambda.java</file>
             <file>file:/home/fede/Escritorio/Automatas2014/src/automata/FA.java</file>
             <file>file:/home/fede/Escritorio/Automatas2014/src/automata/NFA.java</file>
+            <file>file:/home/fede/Escritorio/Automatas2014/src/automata/DFA.java</file>
             <file>file:/home/fede/Escritorio/Automatas2014/src/Main.java</file>
         </group>
     </open-files>
