@@ -83,8 +83,8 @@ public abstract class FA {
                     System.out.println("");
                     if (strLinea.contains("inic->")) { //si la linea tiene el formato de un estado inicial
                         System.out.println("ESTADO INICIAL");
-                        estadoLeido=strLinea.split("->")[1];
-                        estadoLeido=estadoLeido.replace(";", "");
+                        estadoLeido = strLinea.split("->")[1];
+                        estadoLeido = estadoLeido.replace(";", "");
                         if (nombresEstados.isEmpty()) {
                             nombresEstados.add(estadoLeido);
                         }
@@ -92,6 +92,7 @@ public abstract class FA {
                             nombresEstados.add(estadoLeido);
                         }
                         inicial = new State(estadoLeido); // se asigna el estado creado al estado inicial de la tupla que representa el automata
+                        estados.add(inicial);
                         System.out.println("estado inicial guardado: " + inicial.name());
                     }
                     if (strLinea.contains("label") && strLinea.contains(Lambda.toString())) { //si es una transicion lambda
@@ -133,7 +134,7 @@ public abstract class FA {
                             String[] partes = strLinea.split("->"); //separamos la linea en 2 partes en "->"
                             String estado = partes[0].trim();
                             String resto = partes[1];
-                            State s=new State(estado);//creamos el 1er estado 
+                            State s = new State(estado);//creamos el 1er estado 
                             if (!nombresEstados.contains(estado)) { //si no esta incluido en el conjunto de estados
                                 nombresEstados.add(estado); // lo agrega
                             }
@@ -170,11 +171,17 @@ public abstract class FA {
                         if (!nombresEstados.contains(estado)) {
                             nombresEstados.add(estado);
                         }
-                        State s = new State(estado);
-                        if (!estados_finales.contains(s)) {
-                            estados_finales.add(s);
+
+                        LinkedList<String> nombresFinales = new LinkedList();//lista de nombres de los estados finales
+                        for (State s : estados_finales) { //leemos los nombres de los estados finales que ya tenemos
+                            nombresFinales.add(s.name());
                         }
-                        System.out.println("ESTADO FINAL AGREGADO " + s.name());
+                        State s = new State(estado);
+                        if (!nombresFinales.contains(estado)) {
+                            estados_finales.add(s);
+                            System.out.println("ESTADO FINAL AGREGADO " + estado);
+
+                        }
                     }
                 }
             }
@@ -195,11 +202,16 @@ public abstract class FA {
                     }
                 }
             }
-
+            LinkedList<String> estadosYaCreados = new LinkedList();
+            for (State s : estados) { //leemos los nombres de los estados que ya creamos
+                estadosYaCreados.add(s.name());
+            }
             for (int i = 0; i < nombresEstados.size(); i++) {
-                String nombre = nombresEstados.get(i);
-                State e = new State(nombre);
-                estados.add(e);
+                if (!estadosYaCreados.contains(nombresEstados.get(i))) {
+                    String nombre = nombresEstados.get(i);
+                    State e = new State(nombre);
+                    estados.add(e);
+                }
             }
             System.out.println("cant estados: " + estados.size());
 
@@ -298,8 +310,8 @@ public abstract class FA {
         // TODO
         boolean verify = true;
         for (int i = 0; i < s.length(); i++) {
-            Character c=s.charAt(i);
-            verify = verify && (this.alphabet().contains(c)&&(!c.equals(Lambda)));
+            Character c = s.charAt(i);
+            verify = verify && (this.alphabet().contains(c) && (!c.equals(Lambda)));
         }
         return verify;
     }

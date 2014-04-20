@@ -1,5 +1,5 @@
 
-import automata.NFALambda;
+import automata.DFA;
 import automata.FA;
 import automata.State;
 import java.util.LinkedHashSet;
@@ -10,7 +10,7 @@ public class Main {
     public static void main(String[] args) {
         try {
             String curDir = System.getProperty("user.dir");
-            NFALambda automata = (NFALambda) FA.parse_form_file(curDir + "/src/test/nfalambda1.dot");
+            DFA automata = (DFA) FA.parse_form_file(curDir + "/src/test/dfa1.dot");
             /*System.out.println("acepta la cadena? automatas: " + automata.accepts("automatas"));
             System.out.println("acepta la cadena? lenguajes: " + automata.accepts("lenguajes"));
             System.out.println("acepta la cadena? ylenguajes: " + automata.accepts("ylenguajes"));
