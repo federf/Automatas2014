@@ -13,7 +13,7 @@
             <url>src/Main.java</url>
             <bookmark id="2">
                 <name/>
-                <line>19</line>
+                <line>27</line>
                 <key/>
             </bookmark>
         </file>
@@ -23,6 +23,7 @@
             <file>file:/home/fede/Escritorio/Automatas2014/src/automata/NFALambda.java</file>
             <file>file:/home/fede/Escritorio/Automatas2014/src/automata/FA.java</file>
             <file>file:/home/fede/Escritorio/Automatas2014/src/automata/NFA.java</file>
+            <file>file:/home/fede/Escritorio/Automatas2014/src/test/nfa1.dot</file>
             <file>file:/home/fede/Escritorio/Automatas2014/src/automata/DFA.java</file>
             <file>file:/home/fede/Escritorio/Automatas2014/src/Main.java</file>
         </group>
