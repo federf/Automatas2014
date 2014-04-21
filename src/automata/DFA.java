@@ -71,11 +71,11 @@ public class DFA extends FA {
         assert states().contains(from);
         assert alphabet().contains(c);
         if (from != null && !c.equals("")) {
-            if(tieneTransicion(from, c)){
+            if (tieneTransicion(from, c)) {
                 LinkedList<Triple<State, Character, State>> transiciones = new LinkedList(delta);
                 /*for (Triple<State, Character, State> t : delta) {
-                    transiciones.add(t);
-                }*/
+                 transiciones.add(t);
+                 }*/
                 State result = new State("");
                 for (int i = 0; i < transiciones.size(); i++) {
                     Triple<State, Character, State> actual = transiciones.get(i);
@@ -85,8 +85,8 @@ public class DFA extends FA {
                 }
                 System.out.println("resultado desde " + from.name() + " con " + c + ": " + result.name());
                 return result;
-            }else{
-                System.out.println("no hay transicion desde "+from.name()+" con "+c);
+            } else {
+                System.out.println("no hay transicion desde " + from.name() + " con " + c);
                 return new State("");
             }
         } else {
@@ -149,7 +149,31 @@ public class DFA extends FA {
     public NFA toNFA() {
         assert rep_ok();
         // TODO
-        return null;
+        State delta1 = new State("");
+        Character carac = "".charAt(0); //caracter con el cual se encontro la transicion
+        State estadoInicialTrans = null;//estado donde empieza la transicion encontrada
+        LinkedList<State> listaEstados = new LinkedList(this.states());//lista de estados disponibles
+        for (int i = 0; i < listaEstados.size(); i++) {
+            for (Character c : alfabeto) {
+                estadoInicialTrans = listaEstados.get(i);
+                delta1 = this.delta(listaEstados.get(i), c);//vemos si inicial tiene alguna transicion por algun caracter del alfabeto
+                if (!delta1.name().equals("")) {
+                    i = listaEstados.size();
+                    carac = c;
+                }
+            }
+        }
+        State nuevoEstadoNoDet = new State("q" + this.estados.size()); //creamos un nuevo estado para causar no determinismo
+        if (!delta1.name().equals("")) { //si se encontro alguna transicion valida
+            LinkedHashSet<State> nuevosEstados=new LinkedHashSet(this.estados);
+            nuevosEstados.add(nuevoEstadoNoDet); //agregamos el estado nuevo al conjunto de estados
+            Triple<State, Character, State> noDet = new Triple<State, Character, State>(estadoInicialTrans, carac, nuevoEstadoNoDet);//creamos la transicion que causara no determinismo
+            LinkedHashSet<Triple<State, Character, State>> deltaNoDet = new LinkedHashSet(this.delta);
+            deltaNoDet.add(noDet);//agregamos una transicion nueva que genera no determinismo
+            return new NFA(nuevosEstados, this.alfabeto, deltaNoDet, this.initial_state(), this.final_states());//creamos y retornamos el NFA equivalente
+        } else {
+            return null; //caso contrario retornamos un automata vacio
+        }
     }
 
     /**
@@ -161,13 +185,13 @@ public class DFA extends FA {
      */
     public NFALambda toNFALambda() {
         //creo que con agregarle una transicion lambda desde un estado a si mismo ya se vuelve NFALambda
-        
+
         assert rep_ok();
         // TODO
-        Triple<State,Character,State> noDet=new Triple<State,Character,State>(this.initial_state(),Lambda,this.initial_state());
-        LinkedHashSet<Triple<State,Character,State>> deltaLambda=new LinkedHashSet(this.delta);
+        Triple<State, Character, State> noDet = new Triple<State, Character, State>(this.initial_state(), Lambda, this.initial_state());
+        LinkedHashSet<Triple<State, Character, State>> deltaLambda = new LinkedHashSet(this.delta);
         deltaLambda.add(noDet);
-        NFALambda result=new NFALambda(this.states(),this.alphabet(),deltaLambda,this.inicial,this.final_states());
+        NFALambda result = new NFALambda(this.states(), this.alphabet(), deltaLambda, this.inicial, this.final_states());
         return result;
     }
 
@@ -194,18 +218,18 @@ public class DFA extends FA {
     public boolean is_finite() {
         assert rep_ok();
         // TODO
-        boolean finito=true;
-        for(Triple<State,Character,State> t:delta){ //verificamos que no haya ciclos hacia un mismo estado
-            finito=finito && (!t.first().name().equals(t.third().name())); //toda transicion tiene un inicio distinto a su llegada (no hay ciclos sobre un estado)
+        boolean finito = true;
+        for (Triple<State, Character, State> t : delta) { //verificamos que no haya ciclos hacia un mismo estado
+            finito = finito && (!t.first().name().equals(t.third().name())); //toda transicion tiene un inicio distinto a su llegada (no hay ciclos sobre un estado)
         }
-        for(Triple<State,Character,State> t:delta){ //verificamos que no haya ciclos de la forma a->b b->a
-            for(Triple<State,Character,State> t2:delta){
-                if(!t.equals(t2)){ //si no son la misma transicion
-                    finito=finito && (t.third().name().equals(t2.first().name())&&(!t2.third().name().equals(t.first().name())));
+        for (Triple<State, Character, State> t : delta) { //verificamos que no haya ciclos de la forma a->b b->a
+            for (Triple<State, Character, State> t2 : delta) {
+                if (!t.equals(t2)) { //si no son la misma transicion
+                    finito = finito && (t.third().name().equals(t2.first().name()) && (!t2.third().name().equals(t.first().name())));
                     /*
-                    se cumple que para todo par de transiciones tal que el final de la primera es el inicio de la segunda
-                    el final de la segunda es distinto al inicio de la primera
-                    */
+                     se cumple que para todo par de transiciones tal que el final de la primera es el inicio de la segunda
+                     el final de la segunda es distinto al inicio de la primera
+                     */
                 }
             }
         }
@@ -224,25 +248,25 @@ public class DFA extends FA {
     public DFA complement() {
         assert rep_ok();
         // TODO
-        LinkedHashSet<State> new_final_states=new LinkedHashSet();//nuevo conjunto de estados finales;
-        LinkedList<String> estadosDFA=new LinkedList(); //obtenemos los nombres de los estados que posee el automata original
-        for(State s: this.states()){ //obtenemos todos los nombres uno por uno
+        LinkedHashSet<State> new_final_states = new LinkedHashSet();//nuevo conjunto de estados finales;
+        LinkedList<String> estadosDFA = new LinkedList(); //obtenemos los nombres de los estados que posee el automata original
+        for (State s : this.states()) { //obtenemos todos los nombres uno por uno
             estadosDFA.add(s.name());
         }
-        LinkedList<String> nombresFinalesDFA=new LinkedList();//lista de nombres de los estados finales del DFA original
-        for(State s:this.final_states()){ //obtenemos los nombres de los estados finales del dfa original
+        LinkedList<String> nombresFinalesDFA = new LinkedList();//lista de nombres de los estados finales del DFA original
+        for (State s : this.final_states()) { //obtenemos los nombres de los estados finales del dfa original
             nombresFinalesDFA.add(s.name());
         }
-        LinkedList<String> new_nombresFinalesDFA=new LinkedList(); //lista de nombres de los nuevos estados finales
-        for(String unNombre: estadosDFA){//para todo estado
-            if(!nombresFinalesDFA.contains(unNombre)){ //tal que no era final en el DFA original
+        LinkedList<String> new_nombresFinalesDFA = new LinkedList(); //lista de nombres de los nuevos estados finales
+        for (String unNombre : estadosDFA) {//para todo estado
+            if (!nombresFinalesDFA.contains(unNombre)) { //tal que no era final en el DFA original
                 new_nombresFinalesDFA.add(unNombre); //lo convertimos en estado final del nuevo DFA
             }
         }
-        for(String nombre_final:new_nombresFinalesDFA){
+        for (String nombre_final : new_nombresFinalesDFA) {
             new_final_states.add(new State(nombre_final));
         }
-        DFA complemento=new DFA(this.states(),this.alphabet(),this.delta,this.initial_state(),new_final_states);//retornamos un automata finito deterministico
+        DFA complemento = new DFA(this.states(), this.alphabet(), this.delta, this.initial_state(), new_final_states);//retornamos un automata finito deterministico
         //cuyos estados finales son todos los estados que antes no eran finales en el automata original
         return complemento;
     }
@@ -348,33 +372,33 @@ public class DFA extends FA {
     public State deltaAcumulada(State est, String string) {
         System.out.println("");
         if (est != null && !string.isEmpty()) {
-            State result=est;
+            State result = est;
             State parcial;
-            for(int i=0; i<string.length(); i++){
-                parcial=delta(result, string.charAt(i));
-                System.out.println("delta desde "+result.name()+" con "+string.charAt(i)+": "+parcial.name());
-                if(parcial.name().equals("")){
-                    System.out.println("res parcial vacio con "+result.name()+" y "+string.charAt(i));
-                    i=string.length();
+            for (int i = 0; i < string.length(); i++) {
+                parcial = delta(result, string.charAt(i));
+                System.out.println("delta desde " + result.name() + " con " + string.charAt(i) + ": " + parcial.name());
+                if (parcial.name().equals("")) {
+                    System.out.println("res parcial vacio con " + result.name() + " y " + string.charAt(i));
+                    i = string.length();
                 }
-                result=parcial;
+                result = parcial;
             }
-            System.out.println("resultado delta acumulada desde "+est.name()+" con "+string+": "+result.name());
+            System.out.println("resultado delta acumulada desde " + est.name() + " con " + string + ": " + result.name());
             return result;
         } else {
             return est;
         }
 
     }
-    
+
     /*
-    metodo que dado un estado y un caracter c devuelve true si existe una transicion
-    saliente desde el estado con etiqueta c
-    */
-    public boolean tieneTransicion(State s, Character c){
-        boolean result=false;
-        for(Triple<State, Character, State> t: delta){
-            result=result || (t.first().name().equals(s.name()) && t.second().equals(c));
+     metodo que dado un estado y un caracter c devuelve true si existe una transicion
+     saliente desde el estado con etiqueta c
+     */
+    public boolean tieneTransicion(State s, Character c) {
+        boolean result = false;
+        for (Triple<State, Character, State> t : delta) {
+            result = result || (t.first().name().equals(s.name()) && t.second().equals(c));
         }
         return result;
     }
