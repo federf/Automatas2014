@@ -158,8 +158,8 @@ public class NFALambdaCreationTests {
 
 	@Test
 	public void test1() throws Exception {
-		FA nfa1 = FA.parse_form_file("test/nfalambda1");
-		FA nfa2 = FA.parse_form_file("test/nfalambda2");
+		FA nfa1 = FA.parse_form_file("test/nfalambda1.dot");
+		FA nfa2 = FA.parse_form_file("test/nfalambda2.dot");
 		assertTrue(nfa1 instanceof NFALambda);
 		assertTrue(nfa2 instanceof NFALambda);
 	}

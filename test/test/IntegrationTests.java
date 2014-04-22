@@ -21,8 +21,8 @@ public class IntegrationTests {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		my_dfa = (DFA) FA.parse_form_file("test/dfa1");
-		my_nfa = (NFA) FA.parse_form_file("test/nfa1");
+		my_dfa = (DFA) FA.parse_form_file("test/dfa1.dot");
+		my_nfa = (NFA) FA.parse_form_file("test/nfa1.dot");
 		my_nfalambda = (NFALambda) FA.parse_form_file("test/nfalambda1");
 	}
 
