@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 
@@ -70,7 +71,7 @@ public abstract class FA {
             Set<State> estados_finales = new LinkedHashSet<State>(); //conjunto de estados finales
             String estadoLeido = "";
             // Abrimos el archivo
-            FileInputStream fstream = new FileInputStream(path);
+            FileInputStream fstream = new FileInputStream(new java.io.File(path).getAbsolutePath());
             // Creamos el objeto de entrada
             DataInputStream entrada = new DataInputStream(fstream);
             // Creamos el Buffer de Lectura
@@ -322,4 +323,30 @@ public abstract class FA {
      */
     public abstract boolean rep_ok();
 
+    /*
+     metodo que dado un conjunto (set) de estados retorna su conjunto potencia
+     */
+    public static <State> Set<Set<State>> powerSet(Set<State> list) {
+        Set<Set<State>> ps = new HashSet<Set<State>>();
+        ps.add(new HashSet<State>());   // add the empty set
+
+        // for every item in the original list
+        for (State item : list) {
+            Set<Set<State>> newPs = new HashSet<Set<State>>();
+
+            for (Set<State> subset : ps) {
+                // copy all of the current powerset's subsets
+                newPs.add(subset);
+
+                // plus the subsets appended with the current item
+                Set<State> newSubset = new HashSet<State>(subset);
+                newSubset.add(item);
+                newPs.add(newSubset);
+            }
+
+            // powerset is now powerset of list.subSet(0, list.indexOf(item)+1)
+            ps = newPs;
+        }
+        return ps;
+    }
 }
