@@ -379,7 +379,73 @@ public class DFA extends FA {
         assert rep_ok();
         assert other.rep_ok();
         // TODO
-        return null;
+        if(this.alfabeto.equals(other.alfabeto)){
+        State nuevoInicial = new State("{" + this.inicial.name() + "," + other.inicial.name() + "}"); // nuevo estado inicial
+        LinkedHashSet<State> nuevosEstados = new LinkedHashSet(); //nueva lista de estados del DFA interseccion
+        LinkedHashSet<Triple<State, Character, State>> nuevasTransiciones = new LinkedHashSet();//nuevo conjunto de transiciones del DFA interseccion
+        for (State s1 : this.states()) {
+            for (State s2 : other.states()) {
+                String nuevoEstadoNombre = "{" + s1.name() + "," + s2.name() + "}";
+                State nuevoEstado = new State(nuevoEstadoNombre);
+                nuevosEstados.add(nuevoEstado);//creamos el nuevo conjunto de estados
+            }
+        }
+        LinkedList<String> nombresNuevosEstados = new LinkedList();
+        for (State s : nuevosEstados) {//obtenemos todos los nombres de los estados para verificar cuando hay que agregar un estado al conjunto y cuando no
+            nombresNuevosEstados.add(s.name());
+        }
+
+        State resultDelta1 = new State("");//deltas resultado de aplicar a cada estado todo el alfabeto
+        State resultDelta2 = new State("");
+        State resultDeltaCombinado = new State("");//resultado combinado de ambas deltas (nuevo estado combinado)
+        LinkedHashSet<Character> nuevoAlfabetoInterseccion = new LinkedHashSet();
+        nuevoAlfabetoInterseccion.addAll(this.alphabet());
+        //nuevoAlfabetoInterseccion.addAll(other.alphabet()); //creamos el nuevo alfabeto union de ambos alfabetos
+        for (State s1 : this.states()) { //ciclo para crear el conjunto de transiciones
+            for (State s2 : other.states()) {
+                for (Character c : nuevoAlfabetoInterseccion) {
+                    resultDelta1 = this.delta(s1, c); //calculamos la delta de cada estado
+                    resultDelta2 = other.delta(s2, c); //con cada caracter del alfabeto
+                    if (!resultDelta1.name().equals("") && !resultDelta2.name().equals("")) { //solo agregamos al conjunto de transiciones, aquellas que modifican ambos estados
+                        State from = new State("{" + s1.name() + "," + s2.name() + "}");//estado combinado desde donde sale la nueva transicion
+                        String nombreCombinado = "{" + resultDelta1.name() + "," + resultDelta2.name() + "}";//crea un nuevo estado con el nombre combinado de los resultados
+                        if (!nombresNuevosEstados.contains(nombreCombinado)) { //y en caso de no estar en el conjunto de estados, lo crea y lo agrega
+                            resultDeltaCombinado = new State(nombreCombinado);//estado combinado hacia donde llega la nueva transicion
+                        }
+
+                        Triple<State, Character, State> nuevaTransicion = new Triple(from, c, resultDeltaCombinado); //nueva transicion
+                        nuevasTransiciones.add(nuevaTransicion); //agregamos la transicion al conjunto de transiciones
+                    }
+                }
+            }
+        }
+        LinkedList<String> finalesThis = new LinkedList();
+        for (State s : this.final_states()) { //obtenemos los nombres de los estados finales de this
+            finalesThis.add(s.name());
+        }
+
+        LinkedList<String> finalesOther = new LinkedList();
+        for (State s : other.final_states()) { //obtenemos los nombres de los estados finales de other
+            finalesOther.add(s.name());
+        }
+        LinkedHashSet<State> nuevosFinales = new LinkedHashSet();//nuevo conjunto de estados finales del automata union
+        for (State s : nuevosEstados) {
+            String nombre = s.name();
+            System.out.println(nombre);
+            String[] partes = nombre.split(",");
+            partes[0] = partes[0].replace("{", "");
+            partes[1] = partes[1].replace("}", "");
+            if (finalesThis.contains(partes[0]) && finalesOther.contains(partes[1])) { //son estados finales de la interseccion aquellos cuyas partes son estados finales de los automatas originales
+                nuevosFinales.add(s); //agregamos el estado actual al conjunto de estados finales del automata union
+            }
+
+        }
+        return new DFA(nuevosEstados, nuevoAlfabetoInterseccion, nuevasTransiciones, nuevoInicial, nuevosFinales);
+        }else{
+            //supongo que el estado null es el estado con nombre ""
+            return new DFA(new LinkedHashSet<State>(), new LinkedHashSet<Character>(),new LinkedHashSet<Triple<State, Character, State>>(),new State(""), new LinkedHashSet<State>());
+        }
+        //return null;
     }
 
     @Override
