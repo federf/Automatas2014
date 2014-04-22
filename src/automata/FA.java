@@ -71,7 +71,7 @@ public abstract class FA {
             Set<State> estados_finales = new LinkedHashSet<State>(); //conjunto de estados finales
             String estadoLeido = "";
             // Abrimos el archivo
-            FileInputStream fstream = new FileInputStream(new java.io.File(path).getAbsolutePath());
+            FileInputStream fstream = new FileInputStream(path);
             // Creamos el objeto de entrada
             DataInputStream entrada = new DataInputStream(fstream);
             // Creamos el Buffer de Lectura
@@ -348,5 +348,53 @@ public abstract class FA {
             ps = newPs;
         }
         return ps;
+    }
+    
+    /*
+    metodo que dados dos conjuntos de estados, retorna la union entre ambos conjuntos
+    */
+    public Set<State> unirConjuntosEstados(Set<State> unConj, Set<State> otroConj){
+        LinkedHashSet<State> result=new LinkedHashSet();
+        LinkedList<String> nombresEstadosUno=new LinkedList();//lista de nombres del 1er conjunto y en el cual se agregaran los elementos
+        LinkedList<String> nombresEstadosOtro=new LinkedList();
+        for(State s: unConj){//obtenemos los nombres de los estados para comparar 
+            nombresEstadosUno.add(s.name());
+        }
+        for(State s: otroConj){
+            nombresEstadosOtro.add(s.name());
+        }
+        for(String nombre: nombresEstadosOtro){//vemos que estados del 2do conjunto no estan en el 1ero
+            if(!nombresEstadosUno.contains(nombre)){
+                nombresEstadosUno.add(nombre);
+            }
+        }
+        for(String nombre: nombresEstadosUno){//creamos el conjunto de estados resultado
+            State nuevo=new State(nombre);
+            result.add(nuevo);
+        }
+        return result;
+    }
+    
+    /*
+    metodo que dados dos conjuntos de estados retorna si son identicos (contienen los mismos estados)
+    */
+    public boolean conjIguales(Set<State> unConj, Set<State> otroConj){
+        boolean iguales=true;
+        if(unConj.size()==otroConj.size()){
+        LinkedList<String> nombresEstadosUno=new LinkedList();//lista de nombres de los estados del 1er conj
+        for(State s:unConj){
+            nombresEstadosUno.add(s.name());
+        }
+        LinkedList<String> nombresEstadosOtro=new LinkedList();//lista de nombres de los estados del 2do conj
+        for(State s:otroConj){
+            nombresEstadosOtro.add(s.name());
+        }
+        for(String nombre:nombresEstadosUno){
+            iguales=iguales && (nombresEstadosOtro.contains(nombre));
+        }
+        return iguales;
+        }else{
+            return false;
+        }
     }
 }

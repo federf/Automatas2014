@@ -73,8 +73,8 @@ public class NFA extends FA {
         if (from != null && !c.equals("")) {// si from no es null y la cadena no es vacia (para lambda corresponde usar '_')
             LinkedList<Triple<State, Character, State>> transiciones = new LinkedList(delta);
             /*for (Triple<State, Character, State> t : delta) {
-                transiciones.add(t);
-            }*/
+             transiciones.add(t);
+             }*/
             Set<State> result = new LinkedHashSet<State>(); //set de resultado
             for (int i = 0; i < transiciones.size(); i++) {
                 Triple<State, Character, State> actual = transiciones.get(i);
@@ -82,13 +82,13 @@ public class NFA extends FA {
                     result.add(actual.third());
                 }
             }
-            
+
             String resultadoNombres = "[";
             for (State t : result) {
                 resultadoNombres = resultadoNombres + t.name().toString() + ";";
             }
             resultadoNombres = resultadoNombres + "]";
-            System.out.println("resultado por "+c+" desde "+from.name()+": " + resultadoNombres);
+            System.out.println("resultado por " + c + " desde " + from.name() + ": " + resultadoNombres);
             return result;
         } else {
             System.out.println("Caracter o Estado Invalido");
@@ -100,18 +100,18 @@ public class NFA extends FA {
     public String to_dot() {
         assert rep_ok();
         // TODO
-        String result="digraph {\n";
-        result=result+"    "+"inic[shape=point];\n";
-        result=result+"    "+"inic->"+inicial.name()+";\n";
-        String transiciones="\n"; //cadena con las transiciones
-        for(Triple<State,Character,State> t:delta){
-            transiciones=transiciones+"    "+t.first().name()+"->"+t.third().name()+"[label="+'"'+t.second()+'"'+"];\n";
+        String result = "digraph {\n";
+        result = result + "    " + "inic[shape=point];\n";
+        result = result + "    " + "inic->" + inicial.name() + ";\n";
+        String transiciones = "\n"; //cadena con las transiciones
+        for (Triple<State, Character, State> t : delta) {
+            transiciones = transiciones + "    " + t.first().name() + "->" + t.third().name() + "[label=" + '"' + t.second() + '"' + "];\n";
         }
-        String finales="\n";
-        for(State s:estados_finales){
-            finales=finales+"    "+s.name()+"[shape=doublecircle];\n";
+        String finales = "\n";
+        for (State s : estados_finales) {
+            finales = finales + "    " + s.name() + "[shape=doublecircle];\n";
         }
-        result=result+transiciones+"\n"+finales+"}";
+        result = result + transiciones + "\n" + finales + "}";
         return result;
     }
 
@@ -150,11 +150,113 @@ public class NFA extends FA {
     public DFA toDFA() {
         assert rep_ok();
         // TODO
+
+        LinkedList<String> finalesOriginales = new LinkedList();
+        for (State s : this.final_states()) {//obtenemos los nombres de los estados finales originales para comparacion
+            finalesOriginales.add(s.name());
+        }
+        State q0 = new State(inicial.name()); //crea un nuevo estado inicial para el AFD
+        Set<Set<State>> conjPotencia = FA.powerSet(this.states());//conjunto potencia de los estados del NFA original
+        Set<Set<State>> nuevosEstadosFinales = new LinkedHashSet();//lista de nuevos estados finales
+        for (Set<State> set : conjPotencia) {
+            LinkedList<String> nombresEstadosSet = new LinkedList();//lista de nombres de los estados del set
+            for (State estado : set) {
+                nombresEstadosSet.add(estado.name());
+            }
+            boolean esFinal = false;
+            for (String finalNuevo : nombresEstadosSet) {
+                esFinal = esFinal || (finalesOriginales.contains(finalNuevo));
+            }
+            if (esFinal) {//si el conj contiene almenos uno de los estados finales del automata original
+                nuevosEstadosFinales.add(set);//lo agregamos al conj de nuevos estados finales
+            }
+        }
+
+        LinkedHashSet<Triple<Set<State>, Character, Set<State>>> nuevasTransiciones = new LinkedHashSet();
+        for (Set<State> set : conjPotencia) {
+            for (Character c : this.alphabet()) {
+                LinkedHashSet<State> resultadoSet = new LinkedHashSet();//resultado de aplicar un caracter a un set de estados
+                for (State estado : set) {
+                    Set<State> delta = delta(estado, c);//calculamos la delta de cada estado del conjunto con el caracter actual
+                    resultadoSet = (LinkedHashSet<State>) unirConjuntosEstados(resultadoSet, delta); //unimos los resultados en un mismo conjunto resultado
+                }
+                Triple<Set<State>, Character, Set<State>> transicion = new Triple(set, c, resultadoSet); //creamos la transicion
+                nuevasTransiciones.add(transicion); //y la agregamos al conjunto de transiciones
+            }
+        }
+
+        LinkedList<Set<State>> listaConjEstados = new LinkedList(conjPotencia);//lista de conjuntos de estados
+        System.out.println("cuanto tiene?: "+conjPotencia.size());
+                /**
+         * ****************************LIMPIEZA
+         * CONJ DE ESTADOS Y TRANSICIONES*********************************
+         */
+        /*for (Set<State> set : listaConjEstados) {
+            boolean eliminarEstado = false;//booleano que indica si hay alguna transicion que llega al conj actual
+            for (Triple<Set<State>, Character, Set<State>> transConj : nuevasTransiciones) {
+                eliminarEstado = eliminarEstado || (conjIguales(transConj.third(), set));
+            }
+            Set<State> borrado=set;//guardamos el estado en caso de que se deba borrar, ya que se necesita para saber que transiciones eliminar
+            if (!eliminarEstado) {//si no se encontro alguna transicion que llegue al conj actual
+                for (int i = 0; i < listaConjEstados.size(); i++) {
+                    int aBorrar=0;//indice del estado a quitar
+                    if (conjIguales(set, listaConjEstados.get(i))) {
+                        aBorrar=i;
+                    }
+                    listaConjEstados.remove(aBorrar);
+                }
+                for(Triple<Set<State>, Character, Set<State>> transConj : nuevasTransiciones){
+                    if(conjIguales(transConj.first(),borrado)){
+                        nuevasTransiciones.remove(transConj);
+                    }
+                }
+            }
+        }*/
         
-        State q0=new State(inicial.name()); //crea un nuevo estado inicial para el AFD
+        /**
+         * ****************************COMIENZO
+         * TRANSFORMAR CONJ ESTADOS EN ESTADOS*************************************
+         */
         
-        
-        return null;
+        LinkedList<State> listaEstados = new LinkedList();//lista de estados
+        for (int i = 0; i < listaConjEstados.size(); i++) {
+            State nuevo = new State("q" + i); //creamos estados equivalentes
+            listaEstados.add(nuevo);
+        }
+        LinkedHashSet<Triple<State, Character, State>> transicionesEstados = new LinkedHashSet();//nueva lista de transiciones
+        for (Triple<Set<State>, Character, Set<State>> transicionSets : nuevasTransiciones) {//para todas las transiciones de set de estados en set de estados
+            int indicePrimero = 0; //indices del 1er y 3er elementos de la transicion actual
+            int indiceTercero = 0;
+            for (int i = 0; i < listaConjEstados.size(); i++) {//ciclo para buscar el indice en que esta guardado el set de estados corriente
+                if (conjIguales(transicionSets.first(), listaConjEstados.get(i))) {
+                    indicePrimero = i;
+                }
+                if (conjIguales(transicionSets.third(), listaConjEstados.get(i))) {
+                    indiceTercero = i;
+                }
+                Triple<State, Character, State> transicionEstados = new Triple(listaEstados.get(indicePrimero), transicionSets.second(), listaEstados.get(indiceTercero));//creamos para cada transicion de sets en sets una de estado en estado equivalente
+                transicionesEstados.add(transicionEstados);
+            }
+        }
+
+        /**********************CREACION CONJ DE ESTADOS FINALES*******************/
+        LinkedHashSet<State> listaEstadosFinales = new LinkedHashSet();//set de estados finales
+        for (Set<State> set : nuevosEstadosFinales) {//para todo set que es estado final
+            int indiceUnFinal = 0;//indice en que se ubica un set que es estado final
+            for (int i = 0; i < listaConjEstados.size(); i++) {
+                if (conjIguales(set, listaConjEstados.get(i))) {
+                    listaEstadosFinales.add(listaEstados.get(i));
+                }
+            }
+        }
+
+
+        /**
+         * *************************CREACION
+         * DEL DFA**********************************
+         */
+        DFA result = new DFA(new LinkedHashSet(listaEstados), this.alphabet(), transicionesEstados, this.initial_state(), listaEstadosFinales);
+        return result;
     }
 
     @Override
@@ -195,7 +297,6 @@ public class NFA extends FA {
 
     }
 
-    
     public Set<State> deltaAcumulada(Set<State> est, String string) {
         //System.out.println("estados: " + est.toString() + " string: " + string);
         LinkedList<State> listaEstados = new LinkedList(est); //conjunto de estados para la 1er aplicacion
@@ -204,8 +305,8 @@ public class NFA extends FA {
         LinkedList<String> nombresResParcial = new LinkedList();//lista de nombres de los estados que ya se tienen
         if (!est.isEmpty() && !string.isEmpty()) {
             /*for (State s : est) { //buscamos todos los estados pasados como parametros
-                listaEstados.add(s);
-            }*/
+             listaEstados.add(s);
+             }*/
             for (int i = 0; i < listaEstados.size(); i++) { //calculamos la delta de todo el conjunto de estados parametro con el 1er elemento de la cadena
                 LinkedHashSet<State> conUnChar = (LinkedHashSet<State>) delta(listaEstados.get(i), string.charAt(0));//obtenemos la delta de todo el conjunto de estados con el 1er elemento de la cadena
                 LinkedList<String> nombresEstadosObtenidos = new LinkedList();
