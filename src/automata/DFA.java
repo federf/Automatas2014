@@ -192,24 +192,25 @@ public class DFA extends FA {
      * language is finite.
      */
     public boolean is_finite() {
+        
         assert rep_ok();
-        boolean finito = true;
-        for (Triple<State, Character, State> t : delta) { //verificamos que no haya ciclos hacia un mismo estado
-            finito = finito && (!t.first().name().equals(t.third().name())); //toda transicion tiene un inicio distinto a su llegada (no hay ciclos sobre un estado)
-        }
-        for (Triple<State, Character, State> t : delta) { //verificamos que no haya ciclos de la forma a->b b->a
-            for (Triple<State, Character, State> t2 : delta) {
-                if (!t.equals(t2)) { //si no son la misma transicion
-                    finito = finito && (t.third().name().equals(t2.first().name()) && (!t2.third().name().equals(t.first().name())));
-                    /*
-                     se cumple que para todo par de transiciones tal que el final de la primera es el inicio de la segunda
-                     el final de la segunda es distinto al inicio de la primera
-                     */
-                }
+        boolean condicion = true;
+
+        LinkedList<String> lista_de_primeros = new LinkedList<String>();
+
+        for (Triple<State, Character, State> triple : this.delta) {
+           
+            if (!lista_de_primeros.contains(triple.first().name())) {
+                lista_de_primeros.add(triple.first().name());
+            }
+            
+            if (lista_de_primeros.contains(triple.third().name())){
+                condicion = false;
+                break;
             }
         }
-        // !!! faltaria verificar recursivamente si no existe un camino de transiciones validas que genere un ciclo
-        return finito;
+        System.out.println("ES FINITO?: "+condicion);
+        return condicion;
     }
 
     /**
