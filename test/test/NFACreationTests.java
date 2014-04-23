@@ -184,8 +184,8 @@ public class NFACreationTests {
 	
 	@Test
 	public void test1() throws Exception {
-		FA nfa1 = FA.parse_form_file("test/nfa1.dot");
-		FA nfa2 = FA.parse_form_file("test/nfa2.dot");
+		FA nfa1 = FA.parse_form_file("test/test/nfa1.dot");
+		FA nfa2 = FA.parse_form_file("test/test/nfa2.dot");
 		assertTrue(nfa1 instanceof NFA);
 		assertTrue(nfa2 instanceof NFA);
 	}

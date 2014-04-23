@@ -83,10 +83,10 @@ public class DFA extends FA {
                         result = (actual.third());
                     }
                 }
-                System.out.println("resultado desde " + from.name() + " con " + c + ": " + result.name());
+                //System.out.println("resultado desde " + from.name() + " con " + c + ": " + result.name());
                 return result;
             } else {
-                System.out.println("no hay transicion desde " + from.name() + " con " + c);
+                //System.out.println("no hay transicion desde " + from.name() + " con " + c);
                 return new State("");
             }
         } else {

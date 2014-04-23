@@ -83,7 +83,6 @@ public abstract class FA {
                     strLinea = strLinea.trim();//quitamos los espacios innecesarios
                     System.out.println("");
                     if (strLinea.contains("inic->")) { //si la linea tiene el formato de un estado inicial
-                        System.out.println("ESTADO INICIAL");
                         estadoLeido = strLinea.split("->")[1];
                         estadoLeido = estadoLeido.replace(";", "");
                         if (nombresEstados.isEmpty()) {
@@ -94,10 +93,8 @@ public abstract class FA {
                         }
                         inicial = new State(estadoLeido); // se asigna el estado creado al estado inicial de la tupla que representa el automata
                         estados.add(inicial);
-                        System.out.println("estado inicial guardado: " + inicial.name());
                     }
                     if (strLinea.contains("label") && strLinea.contains(Lambda.toString())) { //si es una transicion lambda
-                        System.out.println("TRANSICION LAMBDA");
                         String[] partes = strLinea.split("->"); //separamos la linea en 2 partes en "->"
                         String estado = partes[0].trim();
                         automataACrear = "AFNLambda";
@@ -123,15 +120,12 @@ public abstract class FA {
                             alfabeto.add(Lambda);
                         }
                         Triple<State, Character, State> t = new Triple<State, Character, State>(s, Lambda, s2);
-                        System.out.println("trans Lambda agregada: " + t.first().name().toString() + "->" + t.second().toString() + "->" + t.third().name().toString());
-
                         if (!delta.contains(t)) {
                             delta.add(t);
                             transiciones.add(t);
                         }
                     } else {
                         if (strLinea.contains("label")) {
-                            System.out.println("TRANSICION NORMAL");
                             String[] partes = strLinea.split("->"); //separamos la linea en 2 partes en "->"
                             String estado = partes[0].trim();
                             String resto = partes[1];
@@ -157,8 +151,6 @@ public abstract class FA {
                                 alfabeto.add(label); //la agrega
                             }
                             Triple<State, Character, State> t = new Triple<State, Character, State>(s, label, s2);
-                            System.out.println("trans Lambda agregada: " + t.first().name().toString() + "->" + t.second().toString() + "->" + t.third().name().toString());
-
                             if (!delta.contains(t)) {
                                 delta.add(t);
                                 transiciones.add(t);
@@ -167,7 +159,6 @@ public abstract class FA {
                     }
 
                     if (strLinea.contains("[shape=doublecircle];")) {
-                        System.out.println("ESTADO FINAL");
                         String estado = strLinea.replace("[shape=doublecircle];", "");
                         if (!nombresEstados.contains(estado)) {
                             nombresEstados.add(estado);
@@ -180,8 +171,6 @@ public abstract class FA {
                         State s = new State(estado);
                         if (!nombresFinales.contains(estado)) {
                             estados_finales.add(s);
-                            System.out.println("ESTADO FINAL AGREGADO " + estado);
-
                         }
                     }
                 }
@@ -217,16 +206,34 @@ public abstract class FA {
             System.out.println("cant estados: " + estados.size());
 
             if (automataACrear.equals("AFNLambda")) {
-                System.out.println("CREO AFNLAMBDA");
-                return new NFALambda(estados, alfabeto, delta, inicial, estados_finales);
+                NFALambda NFALamb = new NFALambda(estados, alfabeto, delta, inicial, estados_finales);
+                if (NFALamb.rep_ok()) {
+                    System.out.println("CREO AFNLAMBDA");
+                    return NFALamb;
+                } else {
+                    return null;
+                }
             } else {
 
                 if (automataACrear.equals("AFN")) {
-                    System.out.println("CREO AFN");
-                    return new NFA(estados, alfabeto, delta, inicial, estados_finales);
+                    NFA Nfa = new NFA(estados, alfabeto, delta, inicial, estados_finales);
+                    if (Nfa.rep_ok()) {
+                        System.out.println("CREO AFN");
+                        return Nfa;
+                    } else {
+                        return null;
+                    }
+
                 } else {
-                    System.out.println("CREO AFD");
-                    return new DFA(estados, alfabeto, delta, inicial, estados_finales);
+                    DFA Dfa = new DFA(estados, alfabeto, delta, inicial, estados_finales);
+                    if (Dfa.rep_ok()) {
+                        System.out.println("CREO AFD");
+                        return Dfa;
+                    }else{
+                        return null;
+                    }
+                            
+
                 }
             }
 
@@ -349,51 +356,51 @@ public abstract class FA {
         }
         return ps;
     }
-    
+
     /*
-    metodo que dados dos conjuntos de estados, retorna la union entre ambos conjuntos
-    */
-    public Set<State> unirConjuntosEstados(Set<State> unConj, Set<State> otroConj){
-        LinkedHashSet<State> result=new LinkedHashSet();
-        LinkedList<String> nombresEstadosUno=new LinkedList();//lista de nombres del 1er conjunto y en el cual se agregaran los elementos
-        LinkedList<String> nombresEstadosOtro=new LinkedList();
-        for(State s: unConj){//obtenemos los nombres de los estados para comparar 
+     metodo que dados dos conjuntos de estados, retorna la union entre ambos conjuntos
+     */
+    public Set<State> unirConjuntosEstados(Set<State> unConj, Set<State> otroConj) {
+        LinkedHashSet<State> result = new LinkedHashSet();
+        LinkedList<String> nombresEstadosUno = new LinkedList();//lista de nombres del 1er conjunto y en el cual se agregaran los elementos
+        LinkedList<String> nombresEstadosOtro = new LinkedList();
+        for (State s : unConj) {//obtenemos los nombres de los estados para comparar 
             nombresEstadosUno.add(s.name());
         }
-        for(State s: otroConj){
+        for (State s : otroConj) {
             nombresEstadosOtro.add(s.name());
         }
-        for(String nombre: nombresEstadosOtro){//vemos que estados del 2do conjunto no estan en el 1ero
-            if(!nombresEstadosUno.contains(nombre)){
+        for (String nombre : nombresEstadosOtro) {//vemos que estados del 2do conjunto no estan en el 1ero
+            if (!nombresEstadosUno.contains(nombre)) {
                 nombresEstadosUno.add(nombre);
             }
         }
-        for(String nombre: nombresEstadosUno){//creamos el conjunto de estados resultado
-            State nuevo=new State(nombre);
+        for (String nombre : nombresEstadosUno) {//creamos el conjunto de estados resultado
+            State nuevo = new State(nombre);
             result.add(nuevo);
         }
         return result;
     }
-    
+
     /*
-    metodo que dados dos conjuntos de estados retorna si son identicos (contienen los mismos estados)
-    */
-    public boolean conjIguales(Set<State> unConj, Set<State> otroConj){
-        boolean iguales=true;
-        if(unConj.size()==otroConj.size()){
-        LinkedList<String> nombresEstadosUno=new LinkedList();//lista de nombres de los estados del 1er conj
-        for(State s:unConj){
-            nombresEstadosUno.add(s.name());
-        }
-        LinkedList<String> nombresEstadosOtro=new LinkedList();//lista de nombres de los estados del 2do conj
-        for(State s:otroConj){
-            nombresEstadosOtro.add(s.name());
-        }
-        for(String nombre:nombresEstadosUno){
-            iguales=iguales && (nombresEstadosOtro.contains(nombre));
-        }
-        return iguales;
-        }else{
+     metodo que dados dos conjuntos de estados retorna si son identicos (contienen los mismos estados)
+     */
+    public boolean conjEstadosIguales(Set<State> unConj, Set<State> otroConj) {
+        boolean iguales = true;
+        if (unConj.size() == otroConj.size()) {
+            LinkedList<String> nombresEstadosUno = new LinkedList();//lista de nombres de los estados del 1er conj
+            for (State s : unConj) {
+                nombresEstadosUno.add(s.name());
+            }
+            LinkedList<String> nombresEstadosOtro = new LinkedList();//lista de nombres de los estados del 2do conj
+            for (State s : otroConj) {
+                nombresEstadosOtro.add(s.name());
+            }
+            for (String nombre : nombresEstadosUno) {
+                iguales = iguales && (nombresEstadosOtro.contains(nombre));
+            }
+            return iguales;
+        } else {
             return false;
         }
     }

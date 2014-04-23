@@ -201,32 +201,6 @@ public class NFALambda extends FA {
 
         LinkedList<Set<State>> listaConjEstados = new LinkedList(conjPotencia);//lista de conjuntos de estados
         System.out.println("cuanto tiene?: " + conjPotencia.size());
-        /**
-         * ****************************LIMPIEZA
-         * CONJ DE ESTADOS Y
-         * TRANSICIONES*********************************
-         */
-        /*for (Set<State> set : listaConjEstados) {
-            boolean eliminarEstado = false;//booleano que indica si hay alguna transicion que llega al conj actual
-            for (Triple<Set<State>, Character, Set<State>> transConj : nuevasTransiciones) {
-                eliminarEstado = eliminarEstado || (conjIguales(transConj.third(), set));
-            }
-            Set<State> borrado = set;//guardamos el estado en caso de que se deba borrar, ya que se necesita para saber que transiciones eliminar
-            if (!eliminarEstado) {//si no se encontro alguna transicion que llegue al conj actual
-                for (int i = 0; i < listaConjEstados.size(); i++) {
-                    int aBorrar = 0;//indice del estado a quitar
-                    if (conjIguales(set, listaConjEstados.get(i))) {
-                        aBorrar = i;
-                    }
-                    listaConjEstados.remove(aBorrar);
-                }
-                for (Triple<Set<State>, Character, Set<State>> transConj : nuevasTransiciones) {
-                    if (conjIguales(transConj.first(), borrado)) {
-                        nuevasTransiciones.remove(transConj);
-                    }
-                }
-            }
-        }*/
 
         /**
          * ****************************COMIENZO
@@ -243,10 +217,10 @@ public class NFALambda extends FA {
             int indicePrimero = 0; //indices del 1er y 3er elementos de la transicion actual
             int indiceTercero = 0;
             for (int i = 0; i < listaConjEstados.size(); i++) {//ciclo para buscar el indice en que esta guardado el set de estados corriente
-                if (conjIguales(transicionSets.first(), listaConjEstados.get(i))) {
+                if (conjEstadosIguales(transicionSets.first(), listaConjEstados.get(i))) {
                     indicePrimero = i;
                 }
-                if (conjIguales(transicionSets.third(), listaConjEstados.get(i))) {
+                if (conjEstadosIguales(transicionSets.third(), listaConjEstados.get(i))) {
                     indiceTercero = i;
                 }
                 Triple<State, Character, State> transicionEstados = new Triple(listaEstados.get(indicePrimero), transicionSets.second(), listaEstados.get(indiceTercero));//creamos para cada transicion de sets en sets una de estado en estado equivalente
@@ -262,7 +236,7 @@ public class NFALambda extends FA {
         for (Set<State> set : nuevosEstadosFinales) {//para todo set que es estado final
             int indiceUnFinal = 0;//indice en que se ubica un set que es estado final
             for (int i = 0; i < listaConjEstados.size(); i++) {
-                if (conjIguales(set, listaConjEstados.get(i))) {
+                if (conjEstadosIguales(set, listaConjEstados.get(i))) {
                     listaEstadosFinales.add(listaEstados.get(i));
                 }
             }
@@ -421,11 +395,3 @@ public class NFALambda extends FA {
         return result;
     }
 }
-/*
-hacer metodo que dado un estado devuelve el conj de estados resultado de avanzar 1 vez y solo una vez
-con lambda
-luego llamar recursivo con la cadena completa en caso de avanzar con lambda 1 vez
-y llamar recursivo con la cadena sin su primer elem si se avanza por no lambda
-
-BUSCAR SI LOS NFALAMBDA GARANTIZAN TERMINAR EN ALGUN MOMENTO
-*/

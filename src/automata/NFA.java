@@ -88,7 +88,7 @@ public class NFA extends FA {
                 resultadoNombres = resultadoNombres + t.name().toString() + ";";
             }
             resultadoNombres = resultadoNombres + "]";
-            System.out.println("resultado por " + c + " desde " + from.name() + ": " + resultadoNombres);
+            //System.out.println("resultado por " + c + " desde " + from.name() + ": " + resultadoNombres);
             return result;
         } else {
             System.out.println("Caracter o Estado Invalido");
@@ -155,7 +155,7 @@ public class NFA extends FA {
         for (State s : this.final_states()) {//obtenemos los nombres de los estados finales originales para comparacion
             finalesOriginales.add(s.name());
         }
-        State q0 = new State(inicial.name()); //crea un nuevo estado inicial para el AFD
+        State q0 = this.initial_state(); //crea un nuevo estado inicial para el AFD
         Set<Set<State>> conjPotencia = FA.powerSet(this.states());//conjunto potencia de los estados del NFA original
         Set<Set<State>> nuevosEstadosFinales = new LinkedHashSet();//lista de nuevos estados finales
         for (Set<State> set : conjPotencia) {
@@ -186,38 +186,12 @@ public class NFA extends FA {
         }
 
         LinkedList<Set<State>> listaConjEstados = new LinkedList(conjPotencia);//lista de conjuntos de estados
-        System.out.println("cuanto tiene?: "+conjPotencia.size());
-                /**
-         * ****************************LIMPIEZA
-         * CONJ DE ESTADOS Y TRANSICIONES*********************************
-         */
-        /*for (Set<State> set : listaConjEstados) {
-            boolean eliminarEstado = false;//booleano que indica si hay alguna transicion que llega al conj actual
-            for (Triple<Set<State>, Character, Set<State>> transConj : nuevasTransiciones) {
-                eliminarEstado = eliminarEstado || (conjIguales(transConj.third(), set));
-            }
-            Set<State> borrado=set;//guardamos el estado en caso de que se deba borrar, ya que se necesita para saber que transiciones eliminar
-            if (!eliminarEstado) {//si no se encontro alguna transicion que llegue al conj actual
-                for (int i = 0; i < listaConjEstados.size(); i++) {
-                    int aBorrar=0;//indice del estado a quitar
-                    if (conjIguales(set, listaConjEstados.get(i))) {
-                        aBorrar=i;
-                    }
-                    listaConjEstados.remove(aBorrar);
-                }
-                for(Triple<Set<State>, Character, Set<State>> transConj : nuevasTransiciones){
-                    if(conjIguales(transConj.first(),borrado)){
-                        nuevasTransiciones.remove(transConj);
-                    }
-                }
-            }
-        }*/
-        
+        System.out.println("cuanto tiene?: " + conjPotencia.size());
         /**
          * ****************************COMIENZO
-         * TRANSFORMAR CONJ ESTADOS EN ESTADOS*************************************
+         * TRANSFORMAR CONJ ESTADOS EN
+         * ESTADOS*************************************
          */
-        
         LinkedList<State> listaEstados = new LinkedList();//lista de estados
         for (int i = 0; i < listaConjEstados.size(); i++) {
             State nuevo = new State("q" + i); //creamos estados equivalentes
@@ -228,10 +202,10 @@ public class NFA extends FA {
             int indicePrimero = 0; //indices del 1er y 3er elementos de la transicion actual
             int indiceTercero = 0;
             for (int i = 0; i < listaConjEstados.size(); i++) {//ciclo para buscar el indice en que esta guardado el set de estados corriente
-                if (conjIguales(transicionSets.first(), listaConjEstados.get(i))) {
+                if (conjEstadosIguales(transicionSets.first(), listaConjEstados.get(i))) {
                     indicePrimero = i;
                 }
-                if (conjIguales(transicionSets.third(), listaConjEstados.get(i))) {
+                if (conjEstadosIguales(transicionSets.third(), listaConjEstados.get(i))) {
                     indiceTercero = i;
                 }
                 Triple<State, Character, State> transicionEstados = new Triple(listaEstados.get(indicePrimero), transicionSets.second(), listaEstados.get(indiceTercero));//creamos para cada transicion de sets en sets una de estado en estado equivalente
@@ -239,23 +213,26 @@ public class NFA extends FA {
             }
         }
 
-        /**********************CREACION CONJ DE ESTADOS FINALES*******************/
+        /**
+         * ********************CREACION
+         * CONJ DE ESTADOS FINALES******************
+         */
         LinkedHashSet<State> listaEstadosFinales = new LinkedHashSet();//set de estados finales
         for (Set<State> set : nuevosEstadosFinales) {//para todo set que es estado final
             int indiceUnFinal = 0;//indice en que se ubica un set que es estado final
             for (int i = 0; i < listaConjEstados.size(); i++) {
-                if (conjIguales(set, listaConjEstados.get(i))) {
+                if (conjEstadosIguales(set, listaConjEstados.get(i))) {
                     listaEstadosFinales.add(listaEstados.get(i));
                 }
             }
         }
 
-
         /**
          * *************************CREACION
-         * DEL DFA**********************************
+         * DEL
+         * DFA**********************************
          */
-        DFA result = new DFA(new LinkedHashSet(listaEstados), this.alphabet(), transicionesEstados, this.initial_state(), listaEstadosFinales);
+        DFA result = new DFA(new LinkedHashSet(listaEstados), this.alphabet(), transicionesEstados, q0, listaEstadosFinales);
         return result;
     }
 
