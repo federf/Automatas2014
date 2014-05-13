@@ -223,7 +223,7 @@ public class DFA extends FA {
     public DFA complement() {
         assert rep_ok();
         // TODO
-        LinkedHashSet<State> new_final_states = new LinkedHashSet();//nuevo conjunto de estados finales;
+        LinkedHashSet<State> nuevosEstadosFinales = new LinkedHashSet();//nuevo conjunto de estados finales;
         LinkedList<String> estadosDFA = new LinkedList(); //obtenemos los nombres de los estados que posee el automata original
         for (State s : this.states()) { //obtenemos todos los nombres uno por uno
             estadosDFA.add(s.name());
@@ -238,10 +238,23 @@ public class DFA extends FA {
                 new_nombresFinalesDFA.add(unNombre); //lo convertimos en estado final del nuevo DFA
             }
         }
-        for (String nombre_final : new_nombresFinalesDFA) {
-            new_final_states.add(new State(nombre_final));
+        for (String nombre_final : new_nombresFinalesDFA) {//creamos el nuevo conjunto de estados finales
+            nuevosEstadosFinales.add(new State(nombre_final));
         }
-        DFA complemento = new DFA(this.states(), this.alphabet(), this.delta, this.initial_state(), new_final_states);//retornamos un automata finito deterministico
+        State finalAdicional=new State("qAdic"); //estado final al cual irian todas las transiciones no definidas o no declaradas en el automata original
+        LinkedHashSet<State> nuevosEstados=new LinkedHashSet(this.states());//nuevo conjunto de estados
+        nuevosEstados.add(finalAdicional); //le agregamos el nuevo estado al conjunto de estados
+        nuevosEstadosFinales.add(finalAdicional); //y al conjunto de estados finales
+        LinkedHashSet<Triple<State,Character,State>> nuevasTransiciones=new LinkedHashSet(this.delta);//nuevo conjunto de transiciones
+        for(State s: nuevosEstados){ //agregamos una transicion al estado agregado desde cada estado disponible
+            for(Character c:this.alphabet()){//vemos con que caracteres no hay transiciones desde un estado dado
+                if(!tieneTransicion(s,c)){ //para aquellos que no tenga transicion el automata original
+                    Triple<State,Character,State> transicionNueva=new Triple(s,c,finalAdicional); //creamos una transicion desde el estado corriente al nuevo estado final agregado
+                    nuevasTransiciones.add(transicionNueva);//agregamos la transicion
+                }
+            }
+        }
+        DFA complemento = new DFA(nuevosEstados, this.alphabet(), nuevasTransiciones, this.initial_state(), nuevosEstadosFinales);//retornamos un automata finito deterministico
         //cuyos estados finales son todos los estados que antes no eran finales en el automata original
         return complemento;
     }
