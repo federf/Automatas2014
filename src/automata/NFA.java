@@ -212,7 +212,8 @@ public class NFA extends FA {
                 transicionesEstados.add(transicionEstados);
             }
         }
-
+       
+        
         /**
          * ********************CREACION
          * CONJ DE ESTADOS FINALES******************
@@ -233,6 +234,10 @@ public class NFA extends FA {
          * DFA**********************************
          */
         DFA result = new DFA(new LinkedHashSet(listaEstados), this.alphabet(), transicionesEstados, q0, listaEstadosFinales);
+        /*
+        LIMPIAMOS EL AUTOMATA, ELIMINANDO ESTADOS INALCANZABLES Y LAS TRANSICIONES QUE SALGAN DE DICHOS ESTADOS
+        */
+        result.limpiarAutomata(result.delta);
         return result;
     }
 

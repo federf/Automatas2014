@@ -73,9 +73,6 @@ public class DFA extends FA {
         if (from != null && !c.equals("")) {
             if (tieneTransicion(from, c)) {
                 LinkedList<Triple<State, Character, State>> transiciones = new LinkedList(delta);
-                /*for (Triple<State, Character, State> t : delta) {
-                 transiciones.add(t);
-                 }*/
                 State result = new State("");
                 for (int i = 0; i < transiciones.size(); i++) {
                     Triple<State, Character, State> actual = transiciones.get(i);
@@ -164,10 +161,12 @@ public class DFA extends FA {
 
         assert rep_ok();
         // TODO
-        Triple<State, Character, State> noDet = new Triple<State, Character, State>(this.initial_state(), Lambda, this.initial_state());
-        LinkedHashSet<Triple<State, Character, State>> deltaLambda = new LinkedHashSet(this.delta);
-        deltaLambda.add(noDet);
-        NFALambda result = new NFALambda(this.states(), this.alphabet(), deltaLambda, this.inicial, this.final_states());
+        //Triple<State, Character, State> noDet = new Triple<State, Character, State>(this.initial_state(), Lambda, this.initial_state());
+        //LinkedHashSet<Triple<State, Character, State>> deltaLambda = new LinkedHashSet(this.delta);
+        //deltaLambda.add(noDet);
+        Set<Character> alfabetoLambda=this.alphabet();
+        alfabetoLambda.add(Lambda);
+        NFALambda result = new NFALambda(this.states(), alfabetoLambda, delta, this.inicial, this.final_states());
         return result;
     }
 
