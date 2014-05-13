@@ -164,7 +164,7 @@ public class DFA extends FA {
         //Triple<State, Character, State> noDet = new Triple<State, Character, State>(this.initial_state(), Lambda, this.initial_state());
         //LinkedHashSet<Triple<State, Character, State>> deltaLambda = new LinkedHashSet(this.delta);
         //deltaLambda.add(noDet);
-        Set<Character> alfabetoLambda=this.alphabet();
+        Set<Character> alfabetoLambda = this.alphabet();
         alfabetoLambda.add(Lambda);
         NFALambda result = new NFALambda(this.states(), alfabetoLambda, delta, this.inicial, this.final_states());
         return result;
@@ -180,7 +180,44 @@ public class DFA extends FA {
     public boolean is_empty() {
         assert rep_ok();
         // TODO
-        return false;
+
+        LinkedHashSet<State> alcanzables = new LinkedHashSet();//conjunto de elementos alcanzables desde el estado inicial por cualquier transicion
+        alcanzables = (LinkedHashSet<State>) alcanzablesDesde(this.initial_state());//obtenemos que conjunto de estados son alcanzables desde el inicial
+        LinkedHashSet<State> alcanzablesParcial = new LinkedHashSet();//conjunto de resultado parcial
+        while (!conjEstadosIguales(alcanzables, alcanzablesParcial)) {//mientras no se clausure el conjunto resultado
+            System.out.println("ENTRO AL CICLO...");
+            alcanzablesParcial.addAll(alcanzables);//igualamos los conjuntos
+            alcanzables.clear();
+            alcanzables.addAll(alcanzablesParcial);//igualamos los conjuntos
+
+            System.out.println("alcanza: " + alcanzablesParcial.size());
+
+            LinkedHashSet<State> alcanzablesInterno = new LinkedHashSet(alcanzablesParcial);//conjunto de resultado interno al ciclo
+            for (State s : alcanzablesParcial) {
+
+                System.out.println("ENTRO A UNION RECURSIVA...");
+                System.out.println("desde "+s.name()+" alcanza: ");
+                for (State s2 : alcanzablesDesde(s)) {
+                    System.out.print(s2.name() + " ");
+                }
+                System.out.println();
+                alcanzablesInterno = (LinkedHashSet<State>) unirConjuntosEstados(alcanzablesInterno, alcanzablesDesde(s));//calculamos el conjunto de estados alcanzables desde cada estado del conjunto anterior
+                //por una transicion y luego unimos los resultados
+            }
+
+            alcanzablesParcial.clear();
+            alcanzablesParcial.addAll(alcanzablesInterno);//actualizamos el resultado parcial
+        }
+        boolean vacio = true;
+        LinkedList<String> nombresFinales = new LinkedList();//lista de nombres de estados finales
+        for (State s : this.final_states()) {//buscamos los nombres de los estados finales 
+            nombresFinales.add(s.name());
+        }
+        System.out.println("finales: "+nombresFinales.toString());
+        for (State s : alcanzables) {//para todo estado alcanzable, vemos si alguno es final
+            vacio = vacio && (!nombresFinales.contains(s.name())); //el lenguaje sera vacio si no se llega a un estado final
+        }
+        return vacio;
     }
 
     /**
@@ -191,24 +228,24 @@ public class DFA extends FA {
      * language is finite.
      */
     public boolean is_finite() {
-        
+
         assert rep_ok();
         boolean condicion = true;
 
         LinkedList<String> lista_de_primeros = new LinkedList<String>();
 
         for (Triple<State, Character, State> triple : this.delta) {
-           
+
             if (!lista_de_primeros.contains(triple.first().name())) {
                 lista_de_primeros.add(triple.first().name());
             }
-            
-            if (lista_de_primeros.contains(triple.third().name())){
+
+            if (lista_de_primeros.contains(triple.third().name())) {
                 condicion = false;
                 break;
             }
         }
-        System.out.println("ES FINITO?: "+condicion);
+        System.out.println("ES FINITO?: " + condicion);
         return condicion;
     }
 
@@ -241,15 +278,15 @@ public class DFA extends FA {
         for (String nombre_final : new_nombresFinalesDFA) {//creamos el nuevo conjunto de estados finales
             nuevosEstadosFinales.add(new State(nombre_final));
         }
-        State finalAdicional=new State("qAdic"); //estado final al cual irian todas las transiciones no definidas o no declaradas en el automata original
-        LinkedHashSet<State> nuevosEstados=new LinkedHashSet(this.states());//nuevo conjunto de estados
+        State finalAdicional = new State("qAdic"); //estado final al cual irian todas las transiciones no definidas o no declaradas en el automata original
+        LinkedHashSet<State> nuevosEstados = new LinkedHashSet(this.states());//nuevo conjunto de estados
         nuevosEstados.add(finalAdicional); //le agregamos el nuevo estado al conjunto de estados
         nuevosEstadosFinales.add(finalAdicional); //y al conjunto de estados finales
-        LinkedHashSet<Triple<State,Character,State>> nuevasTransiciones=new LinkedHashSet(this.delta);//nuevo conjunto de transiciones
-        for(State s: nuevosEstados){ //agregamos una transicion al estado agregado desde cada estado disponible
-            for(Character c:this.alphabet()){//vemos con que caracteres no hay transiciones desde un estado dado
-                if(!tieneTransicion(s,c)){ //para aquellos que no tenga transicion el automata original
-                    Triple<State,Character,State> transicionNueva=new Triple(s,c,finalAdicional); //creamos una transicion desde el estado corriente al nuevo estado final agregado
+        LinkedHashSet<Triple<State, Character, State>> nuevasTransiciones = new LinkedHashSet(this.delta);//nuevo conjunto de transiciones
+        for (State s : nuevosEstados) { //agregamos una transicion al estado agregado desde cada estado disponible
+            for (Character c : this.alphabet()) {//vemos con que caracteres no hay transiciones desde un estado dado
+                if (!tieneTransicion(s, c)) { //para aquellos que no tenga transicion el automata original
+                    Triple<State, Character, State> transicionNueva = new Triple(s, c, finalAdicional); //creamos una transicion desde el estado corriente al nuevo estado final agregado
                     nuevasTransiciones.add(transicionNueva);//agregamos la transicion
                 }
             }
@@ -277,7 +314,7 @@ public class DFA extends FA {
         nuevosFinales.add(nuevoInicStar);
         State nuevoInicial = nuevoInicStar;//nuevo estado final
         LinkedHashSet<Triple<State, Character, State>> nuevasTransiciones = new LinkedHashSet(this.delta);//nuevo conjunto de transiciones
-        LinkedHashSet<Triple<State, Character, State>> transInicialNuevo=new LinkedHashSet();//lista de transiciones que inician en el nuevo inicial
+        LinkedHashSet<Triple<State, Character, State>> transInicialNuevo = new LinkedHashSet();//lista de transiciones que inician en el nuevo inicial
         for (Triple<State, Character, State> t : nuevasTransiciones) {//agregamos las transiciones que tenia el estado inicial original con el nuevo estado inicial
             if (t.first().name().equals(this.inicial.name())) {
                 Triple<State, Character, State> nueva = new Triple<>(nuevoInicial, t.second(), t.third());//agregamos las transiciones que tenia el inicial original, al nuevo original
@@ -285,9 +322,9 @@ public class DFA extends FA {
                 transInicialNuevo.add(nueva);//registramos la nueva transicion
             }
         }
-        for(Triple<State, Character, State> t:transInicialNuevo){ //a todo estado final le agregamos transiciones como las del estado inicial
-            for(State s:this.final_states()){
-                Triple<State, Character, State> nuevaTransDesdeFinal=new Triple<State, Character, State>(s,t.second(),t.third());
+        for (Triple<State, Character, State> t : transInicialNuevo) { //a todo estado final le agregamos transiciones como las del estado inicial
+            for (State s : this.final_states()) {
+                Triple<State, Character, State> nuevaTransDesdeFinal = new Triple<State, Character, State>(s, t.second(), t.third());
                 nuevasTransiciones.add(nuevaTransDesdeFinal); //agregamos al conj de transiciones, transiciones identicas a las que salen del nuevo inicio, con el mismo caracter, mismo estado final pero con estado inicial 
                 //igual a todos los finales, en si, agregamos las transiciones que salen del nuevo final, cambiando su salida a cada final
             }
@@ -392,71 +429,71 @@ public class DFA extends FA {
         assert rep_ok();
         assert other.rep_ok();
         // TODO
-        if(this.alfabeto.equals(other.alfabeto)){
-        State nuevoInicial = new State("{" + this.inicial.name() + "," + other.inicial.name() + "}"); // nuevo estado inicial
-        LinkedHashSet<State> nuevosEstados = new LinkedHashSet(); //nueva lista de estados del DFA interseccion
-        LinkedHashSet<Triple<State, Character, State>> nuevasTransiciones = new LinkedHashSet();//nuevo conjunto de transiciones del DFA interseccion
-        for (State s1 : this.states()) {
-            for (State s2 : other.states()) {
-                String nuevoEstadoNombre = "{" + s1.name() + "," + s2.name() + "}";
-                State nuevoEstado = new State(nuevoEstadoNombre);
-                nuevosEstados.add(nuevoEstado);//creamos el nuevo conjunto de estados
+        if (this.alfabeto.equals(other.alfabeto)) {
+            State nuevoInicial = new State("{" + this.inicial.name() + "," + other.inicial.name() + "}"); // nuevo estado inicial
+            LinkedHashSet<State> nuevosEstados = new LinkedHashSet(); //nueva lista de estados del DFA interseccion
+            LinkedHashSet<Triple<State, Character, State>> nuevasTransiciones = new LinkedHashSet();//nuevo conjunto de transiciones del DFA interseccion
+            for (State s1 : this.states()) {
+                for (State s2 : other.states()) {
+                    String nuevoEstadoNombre = "{" + s1.name() + "," + s2.name() + "}";
+                    State nuevoEstado = new State(nuevoEstadoNombre);
+                    nuevosEstados.add(nuevoEstado);//creamos el nuevo conjunto de estados
+                }
             }
-        }
-        LinkedList<String> nombresNuevosEstados = new LinkedList();
-        for (State s : nuevosEstados) {//obtenemos todos los nombres de los estados para verificar cuando hay que agregar un estado al conjunto y cuando no
-            nombresNuevosEstados.add(s.name());
-        }
+            LinkedList<String> nombresNuevosEstados = new LinkedList();
+            for (State s : nuevosEstados) {//obtenemos todos los nombres de los estados para verificar cuando hay que agregar un estado al conjunto y cuando no
+                nombresNuevosEstados.add(s.name());
+            }
 
-        State resultDelta1 = new State("");//deltas resultado de aplicar a cada estado todo el alfabeto
-        State resultDelta2 = new State("");
-        State resultDeltaCombinado = new State("");//resultado combinado de ambas deltas (nuevo estado combinado)
-        LinkedHashSet<Character> nuevoAlfabetoInterseccion = new LinkedHashSet();
-        nuevoAlfabetoInterseccion.addAll(this.alphabet());
-        //nuevoAlfabetoInterseccion.addAll(other.alphabet()); //creamos el nuevo alfabeto union de ambos alfabetos
-        for (State s1 : this.states()) { //ciclo para crear el conjunto de transiciones
-            for (State s2 : other.states()) {
-                for (Character c : nuevoAlfabetoInterseccion) {
-                    resultDelta1 = this.delta(s1, c); //calculamos la delta de cada estado
-                    resultDelta2 = other.delta(s2, c); //con cada caracter del alfabeto
-                    if (!resultDelta1.name().equals("") && !resultDelta2.name().equals("")) { //solo agregamos al conjunto de transiciones, aquellas que modifican ambos estados
-                        State from = new State("{" + s1.name() + "," + s2.name() + "}");//estado combinado desde donde sale la nueva transicion
-                        String nombreCombinado = "{" + resultDelta1.name() + "," + resultDelta2.name() + "}";//crea un nuevo estado con el nombre combinado de los resultados
-                        if (!nombresNuevosEstados.contains(nombreCombinado)) { //y en caso de no estar en el conjunto de estados, lo crea y lo agrega
-                            resultDeltaCombinado = new State(nombreCombinado);//estado combinado hacia donde llega la nueva transicion
+            State resultDelta1 = new State("");//deltas resultado de aplicar a cada estado todo el alfabeto
+            State resultDelta2 = new State("");
+            State resultDeltaCombinado = new State("");//resultado combinado de ambas deltas (nuevo estado combinado)
+            LinkedHashSet<Character> nuevoAlfabetoInterseccion = new LinkedHashSet();
+            nuevoAlfabetoInterseccion.addAll(this.alphabet());
+            //nuevoAlfabetoInterseccion.addAll(other.alphabet()); //creamos el nuevo alfabeto union de ambos alfabetos
+            for (State s1 : this.states()) { //ciclo para crear el conjunto de transiciones
+                for (State s2 : other.states()) {
+                    for (Character c : nuevoAlfabetoInterseccion) {
+                        resultDelta1 = this.delta(s1, c); //calculamos la delta de cada estado
+                        resultDelta2 = other.delta(s2, c); //con cada caracter del alfabeto
+                        if (!resultDelta1.name().equals("") && !resultDelta2.name().equals("")) { //solo agregamos al conjunto de transiciones, aquellas que modifican ambos estados
+                            State from = new State("{" + s1.name() + "," + s2.name() + "}");//estado combinado desde donde sale la nueva transicion
+                            String nombreCombinado = "{" + resultDelta1.name() + "," + resultDelta2.name() + "}";//crea un nuevo estado con el nombre combinado de los resultados
+                            if (!nombresNuevosEstados.contains(nombreCombinado)) { //y en caso de no estar en el conjunto de estados, lo crea y lo agrega
+                                resultDeltaCombinado = new State(nombreCombinado);//estado combinado hacia donde llega la nueva transicion
+                            }
+
+                            Triple<State, Character, State> nuevaTransicion = new Triple(from, c, resultDeltaCombinado); //nueva transicion
+                            nuevasTransiciones.add(nuevaTransicion); //agregamos la transicion al conjunto de transiciones
                         }
-
-                        Triple<State, Character, State> nuevaTransicion = new Triple(from, c, resultDeltaCombinado); //nueva transicion
-                        nuevasTransiciones.add(nuevaTransicion); //agregamos la transicion al conjunto de transiciones
                     }
                 }
             }
-        }
-        LinkedList<String> finalesThis = new LinkedList();
-        for (State s : this.final_states()) { //obtenemos los nombres de los estados finales de this
-            finalesThis.add(s.name());
-        }
-
-        LinkedList<String> finalesOther = new LinkedList();
-        for (State s : other.final_states()) { //obtenemos los nombres de los estados finales de other
-            finalesOther.add(s.name());
-        }
-        LinkedHashSet<State> nuevosFinales = new LinkedHashSet();//nuevo conjunto de estados finales del automata union
-        for (State s : nuevosEstados) {
-            String nombre = s.name();
-            System.out.println(nombre);
-            String[] partes = nombre.split(",");
-            partes[0] = partes[0].replace("{", "");
-            partes[1] = partes[1].replace("}", "");
-            if (finalesThis.contains(partes[0]) && finalesOther.contains(partes[1])) { //son estados finales de la interseccion aquellos cuyas partes son estados finales de los automatas originales
-                nuevosFinales.add(s); //agregamos el estado actual al conjunto de estados finales del automata union
+            LinkedList<String> finalesThis = new LinkedList();
+            for (State s : this.final_states()) { //obtenemos los nombres de los estados finales de this
+                finalesThis.add(s.name());
             }
 
-        }
-        return new DFA(nuevosEstados, nuevoAlfabetoInterseccion, nuevasTransiciones, nuevoInicial, nuevosFinales);
-        }else{
+            LinkedList<String> finalesOther = new LinkedList();
+            for (State s : other.final_states()) { //obtenemos los nombres de los estados finales de other
+                finalesOther.add(s.name());
+            }
+            LinkedHashSet<State> nuevosFinales = new LinkedHashSet();//nuevo conjunto de estados finales del automata union
+            for (State s : nuevosEstados) {
+                String nombre = s.name();
+                System.out.println(nombre);
+                String[] partes = nombre.split(",");
+                partes[0] = partes[0].replace("{", "");
+                partes[1] = partes[1].replace("}", "");
+                if (finalesThis.contains(partes[0]) && finalesOther.contains(partes[1])) { //son estados finales de la interseccion aquellos cuyas partes son estados finales de los automatas originales
+                    nuevosFinales.add(s); //agregamos el estado actual al conjunto de estados finales del automata union
+                }
+
+            }
+            return new DFA(nuevosEstados, nuevoAlfabetoInterseccion, nuevasTransiciones, nuevoInicial, nuevosFinales);
+        } else {
             //supongo que el estado null es el estado con nombre ""
-            return new DFA(new LinkedHashSet<State>(), new LinkedHashSet<Character>(),new LinkedHashSet<Triple<State, Character, State>>(),new State(""), new LinkedHashSet<State>());
+            return new DFA(new LinkedHashSet<State>(), new LinkedHashSet<Character>(), new LinkedHashSet<Triple<State, Character, State>>(), new State(""), new LinkedHashSet<State>());
         }
         //return null;
     }
@@ -518,14 +555,14 @@ public class DFA extends FA {
             State parcial;
             for (int i = 0; i < string.length(); i++) {
                 parcial = delta(result, string.charAt(i));
-                System.out.println("delta desde " + result.name() + " con " + string.charAt(i) + ": " + parcial.name());
+                //System.out.println("delta desde " + result.name() + " con " + string.charAt(i) + ": " + parcial.name());
                 if (parcial.name().equals("")) {
-                    System.out.println("res parcial vacio con " + result.name() + " y " + string.charAt(i));
+                    //System.out.println("res parcial vacio con " + result.name() + " y " + string.charAt(i));
                     i = string.length();
                 }
                 result = parcial;
             }
-            System.out.println("resultado delta acumulada desde " + est.name() + " con " + string + ": " + result.name());
+            //System.out.println("resultado delta acumulada desde " + est.name() + " con " + string + ": " + result.name());
             return result;
         } else {
             return est;
@@ -541,6 +578,22 @@ public class DFA extends FA {
         boolean result = false;
         for (Triple<State, Character, State> t : delta) {
             result = result || (t.first().name().equals(s.name()) && t.second().equals(c));
+        }
+        return result;
+    }
+
+    /*
+     metodo que dado un estado devuelve el conjunto de estados alcanzables desde el mismo transitando una sola transicion
+     */
+    public Set<State> alcanzablesDesde(State s) {
+        LinkedHashSet<State> result = new LinkedHashSet();//conjunto resultado general
+        result.add(s);//el estado es alcanzable desde si mismo
+        for (Triple<State, Character, State> transicion : this.delta) {
+            if (transicion.first().name().equals(s.name())) {//para toda transicion que salga desde el estado parametro
+                if (!result.contains(transicion.third())) {
+                    result.add(transicion.third()); //agregamos el estado al cual se dirige siempre que no este ya contenido en el conjunto resultado
+                }
+            }
         }
         return result;
     }
