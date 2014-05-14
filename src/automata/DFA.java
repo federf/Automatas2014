@@ -196,7 +196,7 @@ public class DFA extends FA {
             for (State s : alcanzablesParcial) {
 
                 System.out.println("ENTRO A UNION RECURSIVA...");
-                System.out.println("desde "+s.name()+" alcanza: ");
+                System.out.println("desde " + s.name() + " alcanza: ");
                 for (State s2 : alcanzablesDesde(s)) {
                     System.out.print(s2.name() + " ");
                 }
@@ -213,7 +213,7 @@ public class DFA extends FA {
         for (State s : this.final_states()) {//buscamos los nombres de los estados finales 
             nombresFinales.add(s.name());
         }
-        System.out.println("finales: "+nombresFinales.toString());
+        System.out.println("finales: " + nombresFinales.toString());
         for (State s : alcanzables) {//para todo estado alcanzable, vemos si alguno es final
             vacio = vacio && (!nombresFinales.contains(s.name())); //el lenguaje sera vacio si no se llega a un estado final
         }
@@ -307,29 +307,23 @@ public class DFA extends FA {
     public DFA star() { //implementado
         assert rep_ok();
         // TODO
-        State nuevoInicStar = new State("q0*");//nuevo estado inicial que es ademas estado de aceptacion
-        LinkedHashSet<State> nuevosEstados = new LinkedHashSet(this.states());
-        nuevosEstados.add(nuevoInicStar);//agregamos el nuevo inicial al conjunto de estados
         LinkedHashSet<State> nuevosFinales = new LinkedHashSet(this.final_states());//nuevo conj de estados finales
-        nuevosFinales.add(nuevoInicStar);
-        State nuevoInicial = nuevoInicStar;//nuevo estado final
+        nuevosFinales.add(this.initial_state());
         LinkedHashSet<Triple<State, Character, State>> nuevasTransiciones = new LinkedHashSet(this.delta);//nuevo conjunto de transiciones
-        LinkedHashSet<Triple<State, Character, State>> transInicialNuevo = new LinkedHashSet();//lista de transiciones que inician en el nuevo inicial
-        for (Triple<State, Character, State> t : nuevasTransiciones) {//agregamos las transiciones que tenia el estado inicial original con el nuevo estado inicial
+        LinkedHashSet<Triple<State, Character, State>> transInicial = new LinkedHashSet();//lista de transiciones que inician en el estado inicial
+        for (Triple<State, Character, State> t : this.delta) {//vemos que transiciones salian del estado inicial
             if (t.first().name().equals(this.inicial.name())) {
-                Triple<State, Character, State> nueva = new Triple<>(nuevoInicial, t.second(), t.third());//agregamos las transiciones que tenia el inicial original, al nuevo original
-                nuevasTransiciones.add(nueva);//agregamos la nueva transicion
-                transInicialNuevo.add(nueva);//registramos la nueva transicion
+                transInicial.add(t) ;
             }
         }
-        for (Triple<State, Character, State> t : transInicialNuevo) { //a todo estado final le agregamos transiciones como las del estado inicial
+        for (Triple<State, Character, State> t : transInicial) { //a todo estado final le agregamos transiciones como las del estado inicial
             for (State s : this.final_states()) {
                 Triple<State, Character, State> nuevaTransDesdeFinal = new Triple<State, Character, State>(s, t.second(), t.third());
-                nuevasTransiciones.add(nuevaTransDesdeFinal); //agregamos al conj de transiciones, transiciones identicas a las que salen del nuevo inicio, con el mismo caracter, mismo estado final pero con estado inicial 
+                nuevasTransiciones.add(nuevaTransDesdeFinal); //agregamos al conj de transiciones, transiciones identicas a las que salen del inicio, con el mismo caracter, mismo estado final pero con estado inicial 
                 //igual a todos los finales, en si, agregamos las transiciones que salen del nuevo final, cambiando su salida a cada final
             }
         }
-        return new DFA(nuevosEstados, this.alphabet(), nuevasTransiciones, nuevoInicial, nuevosFinales);
+        return new DFA(this.states(), this.alphabet(), nuevasTransiciones, this.initial_state(), nuevosFinales);
     }
 
     /**

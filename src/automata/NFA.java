@@ -212,11 +212,11 @@ public class NFA extends FA {
                 transicionesEstados.add(transicionEstados);
             }
         }
-       
-        
+
         /**
          * ********************CREACION
-         * CONJ DE ESTADOS FINALES******************
+         * CONJ DE ESTADOS
+         * FINALES******************
          */
         LinkedHashSet<State> listaEstadosFinales = new LinkedHashSet();//set de estados finales
         for (Set<State> set : nuevosEstadosFinales) {//para todo set que es estado final
@@ -235,8 +235,8 @@ public class NFA extends FA {
          */
         DFA result = new DFA(new LinkedHashSet(listaEstados), this.alphabet(), transicionesEstados, q0, listaEstadosFinales);
         /*
-        LIMPIAMOS EL AUTOMATA, ELIMINANDO ESTADOS INALCANZABLES Y LAS TRANSICIONES QUE SALGAN DE DICHOS ESTADOS
-        */
+         LIMPIAMOS EL AUTOMATA, ELIMINANDO ESTADOS INALCANZABLES Y LAS TRANSICIONES QUE SALGAN DE DICHOS ESTADOS
+         */
         result.limpiarAutomata(result.delta);
         return result;
     }
@@ -280,43 +280,21 @@ public class NFA extends FA {
     }
 
     public Set<State> deltaAcumulada(Set<State> est, String string) {
-        //System.out.println("estados: " + est.toString() + " string: " + string);
-        LinkedList<State> listaEstados = new LinkedList(est); //conjunto de estados para la 1er aplicacion
         LinkedHashSet<State> result = new LinkedHashSet();
         LinkedHashSet<State> resultadoParcial = new LinkedHashSet();//lista de estados ya obtenidos
-        LinkedList<String> nombresResParcial = new LinkedList();//lista de nombres de los estados que ya se tienen
+        LinkedHashSet<State> conUnEstado = new LinkedHashSet();//conjunto resultado de delta sobre un unico estado
         if (!est.isEmpty() && !string.isEmpty()) {
-            /*for (State s : est) { //buscamos todos los estados pasados como parametros
-             listaEstados.add(s);
-             }*/
-            for (int i = 0; i < listaEstados.size(); i++) { //calculamos la delta de todo el conjunto de estados parametro con el 1er elemento de la cadena
-                LinkedHashSet<State> conUnChar = (LinkedHashSet<State>) delta(listaEstados.get(i), string.charAt(0));//obtenemos la delta de todo el conjunto de estados con el 1er elemento de la cadena
-                LinkedList<String> nombresEstadosObtenidos = new LinkedList();
-                for (State s : conUnChar) { //leemos todos los nombres de los estados obtenidos con delta
-                    nombresEstadosObtenidos.add(s.name());
-                }
-                nombresResParcial.clear();
-                for (State s : resultadoParcial) {//actualizamos los nombres de los estados que ya se tienen
-                    nombresResParcial.add(s.name());
-                }
-                for (int j = 0; j < nombresEstadosObtenidos.size(); j++) { //para todo nombre en la lista de nombres de elementos obtenidos por delta
-                    if (!nombresResParcial.contains(nombresEstadosObtenidos.get(j))) { //si no esta incluido en la lista de nombres de estados ya obtenidos
-                        nombresResParcial.add(nombresEstadosObtenidos.get(j)); //se lo agrega
-                    }
-                }
+            for (State s : est) {//para cada estado del conjunto pasado como parametro
+                conUnEstado = (LinkedHashSet<State>) delta(s, string.charAt(0));//calculamos la delta con el 1er caracter de la cadena
+                resultadoParcial = (LinkedHashSet<State>) unirConjuntosEstados(resultadoParcial, conUnEstado);//unimos los resultados parciales
             }
-            resultadoParcial.clear();//vaciamos la lista de resultado parcial(por si acaso no estaba vacia)
-            if (!nombresResParcial.isEmpty()) {// si la lista de proximos elementos no es vacia
-                for (String s : nombresResParcial) { //agregamos los estados correspondientes
-                    State nuevo = new State(s);
-                    resultadoParcial.add(nuevo);
-                }
-            } else { //sino devolvemos lista vacia
-                return new LinkedHashSet();
+            if (resultadoParcial.isEmpty()) {//si el resultado parcial es vacio
+                return new LinkedHashSet();//retornamos conjunto vacio
+            } else {//sino, llamamos recursivamente con la subcadena pasada como parametro, sin su 1er elemento
+                String subString=string.substring(1);
+                result=(LinkedHashSet<State>) deltaAcumulada(resultadoParcial,subString);//llamada recursiva
+                return result;
             }
-            String substring = string.substring(1);
-            result = (LinkedHashSet<State>) deltaAcumulada(resultadoParcial, substring);
-            return result;
         } else {
             if (string.isEmpty()) {
                 System.out.println("cadena vacia ");

@@ -69,28 +69,38 @@ public class NFALambda extends FA {
         return estados_finales;
     }
 
+    /**
+     * metodo que dado un estado from y
+     * un caracter c, retorna el conj de
+     * estados a los cuales puede
+     * avanzarse desde el estado from
+     * por el caracter c
+     *
+     * @param from
+     * @param c
+     * @return
+     */
     @Override
     public Set<State> delta(State from, Character c) {
         assert states().contains(from);
         assert alphabet().contains(c);
-        LinkedList<Triple<State, Character, State>> trans = new LinkedList();
-        Set<State> clausura = clausuraLambda(from, trans);
+        LinkedList<Triple<State, Character, State>> trans = new LinkedList();//lista de transiciones
+        //Set<State> clausura = clausuraLambda(from, trans);//clausuramos el estado 
+        Set<State> result = new LinkedHashSet();
+        //Set<State> result = clausuraLambda(from, trans); //set de resultado
         if (from != null && !c.equals("")) {
-            LinkedList<Triple<State, Character, State>> transiciones = new LinkedList(delta);
-            Set<State> result = new LinkedHashSet<>(); //set de resultado
-            result.add(from);
-            for (int i = 0; i < transiciones.size(); i++) { //buscamos las transiciones desde from por c y agregamos el destino de estas al conjunto resultado
-                Triple<State, Character, State> actual = transiciones.get(i);
-                if (actual.first().name().equals(from.name()) && actual.second().equals(c)) {
-                    result.add(actual.third());
+            for (Triple<State, Character, State> t : this.delta) {//para toda transicion
+                if (t.first().name().equals(from.name()) && t.second().equals(c)) {//tal que sale desde from por c
+                    //LinkedList<Triple<State, Character, State>> listaTransiciones = new LinkedList();//lista solo para calculo clausura lambda
+                    //result = unirConjuntosEstados(result, clausuraLambda(t.third(), listaTransiciones)); //calculamos la clausura del estado al que llega y lo agregamos al resultado
+                    result.add(t.third());
                 }
             }
-            result.addAll(clausura);
             return result;
         } else {
             if (from != null && c.equals("")) {
                 System.out.println("Caracter Invalido (es vacio)");
-                return clausuraLambda(from, new LinkedList());
+                return result;
             } else {
                 System.out.println("Estado invalido (es vacio)");
                 return new LinkedHashSet();
@@ -139,14 +149,24 @@ public class NFALambda extends FA {
         assert verify_string(string);
         if (rep_ok() && (string != null) && verify_string(string)) {
             //calcular la delta acumulada de string y luego comparar el conjunto retornado con el conj de estados finales
-            LinkedHashSet<State> acum = new LinkedHashSet();  //lista de estados
-            acum.add(inicial); //agregamos el inicial
+            LinkedList<Triple<State, Character, State>> clausura = new LinkedList();//lista para calculo de clausura lamba del estado inicial
+            LinkedHashSet<State> acum = new LinkedHashSet(clausuraLambda(this.initial_state(), clausura));  //calculamos la clausura lambda del estado inicial
             Set<State> deltaAcum = deltaAcumulada(acum, string); //aplicamos la delta acumulada
             boolean accepted = false;
+            for (State s2 : this.final_states()) {
+                System.out.println("estado: " + s2.name());
+            }
+            System.out.print("delta acumulada {");
+            for (State s : deltaAcum) {
+                System.out.print(s.name() + " ");
+            }
+            System.out.print("}");
+            System.out.println();
             for (State s : deltaAcum) { //al final, el ultimo conjunto de estados contiene al menos un estado final
-                for (State s2 : estados_finales) {
-                    System.out.println("estado obtenido?: " + s.name() + " comparado a: " + s2.name());
-                    accepted = accepted || (s.name().equals(s2.name())); //si es asi, la cadena es aceptada
+                for (State s2 : this.final_states()) {
+                    if (s.name().equals(s2.name())) { //si es asi, la cadena es aceptada
+                        accepted = true;
+                    }
                 }
             }
             return accepted;
@@ -230,7 +250,8 @@ public class NFALambda extends FA {
 
         /**
          * ********************CREACION
-         * CONJ DE ESTADOS FINALES******************
+         * CONJ DE ESTADOS
+         * FINALES******************
          */
         LinkedHashSet<State> listaEstadosFinales = new LinkedHashSet();//set de estados finales
         for (Set<State> set : nuevosEstadosFinales) {//para todo set que es estado final
@@ -316,7 +337,7 @@ public class NFALambda extends FA {
         for (int i = 0; i < e.size(); i++) { //llamada recursiva
             if (!e.get(i).name().equals(s.name())) {
                 resultRecursivo = clausuraLambda(e.get(i), transLambdaYaEvaluadas);
-                result.addAll(resultRecursivo);
+                result = unirConjuntosEstados(result, resultRecursivo);
             }
         }
 
@@ -333,38 +354,66 @@ public class NFALambda extends FA {
      Al inicio se le pasaria un conj que contiene el estado inicial
      */
     public Set<State> deltaAcumulada(Set<State> est, String string) { //CONSULTAR TRATAMIENTO POR LAMBDA!!!! FALTA AGREGARLO, EL QUE ESTA ES EL TRATAMIENTO DEL NFA SIN LAMBDA
-        LinkedList<State> listaEstados = new LinkedList(est); //conjunto de estados para la 1er aplicacion
+        
+        
+        System.out.println("");
+        if(!string.isEmpty()){
+            System.out.println("caracter: "+string.charAt(0));
+        }else{
+            System.out.println("caracter: vacio");
+        }
+        
+        System.out.println("est:");
+        System.out.print("{");
+        for (State s : est) {
+            System.out.print(s.name() + " ");
+        }
+        System.out.println("}");
+
         LinkedHashSet<State> result = new LinkedHashSet();
         LinkedHashSet<State> resultadoParcial = new LinkedHashSet();//lista de estados ya obtenidos
-        LinkedList<String> nombresResParcial = new LinkedList();//lista de nombres de los estados que ya se tienen
+        boolean puedeAvanzarPorCaracter = false;//booleano que indica que se puede avanzar consumiendo la cadena
         if (!est.isEmpty() && !string.isEmpty()) {
-            for (int i = 0; i < listaEstados.size(); i++) { //calculamos la delta de todo el conjunto de estados parametro con el 1er elemento de la cadena
-                LinkedHashSet<State> conUnChar = (LinkedHashSet<State>) delta(listaEstados.get(i), string.charAt(0));//obtenemos la delta de todo el conjunto de estados con el 1er elemento de la cadena
-                LinkedList<String> nombresEstadosObtenidos = new LinkedList();
-                for (State s : conUnChar) { //leemos todos los nombres de los estados obtenidos con delta
-                    nombresEstadosObtenidos.add(s.name());
-                }
-                nombresResParcial.clear();
-                for (State s : resultadoParcial) {//actualizamos los nombres de los estados que ya se tienen
-                    nombresResParcial.add(s.name());
-                }
-                for (int j = 0; j < nombresEstadosObtenidos.size(); j++) { //para todo nombre en la lista de nombres de elementos obtenidos por delta
-                    if (!nombresResParcial.contains(nombresEstadosObtenidos.get(j))) { //si no esta incluido en la lista de nombres de estados ya obtenidos
-                        nombresResParcial.add(nombresEstadosObtenidos.get(j)); //se lo agrega
+            for (State s : est) {//para todos los estados del conjunto de estados pasado como parametro
+                puedeAvanzarPorCaracter = puedeAvanzarPorCaracter || (tieneTransiciones(s, string.charAt(0)));
+                LinkedHashSet<State> conUnChar = (LinkedHashSet<State>) delta(s, string.charAt(0));//obtenemos la delta de un estado del conjunto con el 1er elemento de la cadena
+                resultadoParcial = (LinkedHashSet<State>) unirConjuntosEstados(resultadoParcial, conUnChar);//unimos los resultados
+            }
+
+            System.out.println("resParcial:");
+            System.out.print("{");
+            for (State s : resultadoParcial) {
+                System.out.print(s.name() + " ");
+            }
+            System.out.println("}");
+
+            LinkedHashSet<State> resultadoClausura = new LinkedHashSet();//resultado de aplicar la clausura lambda al resultado parcial obtenido
+            for (State s : resultadoParcial) {//clausuramos el resultado obtenido
+                LinkedList<Triple<State, Character, State>> list = new LinkedList(); //lista para calculo clausura lambda
+                resultadoClausura = (LinkedHashSet<State>) unirConjuntosEstados(resultadoClausura, clausuraLambda(s, list));
+            }
+
+            System.out.println("clausura:");
+            System.out.print("{");
+            for (State s : resultadoClausura) {
+                System.out.print(s.name() + " ");
+            }
+            System.out.println("}");
+
+            if (puedeAvanzarPorCaracter) {
+                String substring = string.substring(1);//quitamos el 1er elemento de la cadena
+                result = (LinkedHashSet<State>) deltaAcumulada(resultadoClausura, substring);//llamamos recursivamente con un elemento menos
+            } else {
+                boolean cicloInfinito = false;
+                for (State s : est) {
+                    for (State s2 : resultadoParcial) {
+                        cicloInfinito = cicloInfinito || (s.name().equals(s2.name()));
                     }
                 }
-            }
-            resultadoParcial.clear();//vaciamos la lista de resultado parcial(por si acaso no estaba vacia)
-            if (!nombresResParcial.isEmpty()) {// si la lista de proximos elementos no es vacia
-                for (String s : nombresResParcial) { //agregamos los estados correspondientes
-                    State nuevo = new State(s);
-                    resultadoParcial.add(nuevo);
+                if (cicloInfinito) {
+                    return new LinkedHashSet();
                 }
-            } else { //sino devolvemos lista vacia
-                return new LinkedHashSet();
             }
-            String substring = string.substring(1);
-            result = (LinkedHashSet<State>) deltaAcumulada(resultadoParcial, substring);
             return result;
         } else {
             if (string.isEmpty()) {
@@ -390,7 +439,7 @@ public class NFALambda extends FA {
         for (int i = 0; i < trans.size(); i++) {
             Triple<State, Character, State> actual = trans.get(i);
             result = result || (actual.first().name().equals(s.name()) && (actual.second().equals(c)));
-            result = result || (actual.first().name().equals(s.name()) && (actual.second().equals(Lambda)));
+            //result = result || (actual.first().name().equals(s.name()) && (actual.second().equals(Lambda)));
         }
         return result;
     }

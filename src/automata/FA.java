@@ -441,7 +441,7 @@ public abstract class FA {
             nombresModificados = new LinkedList(nombresEstados);//igualamos las listas de nombres
             nombresEstados = new LinkedList(nombresModificados);//y comenzamos a verificar si la lista puede minimizarse, es decir, borrar estados inalcanzables
             for (String nombreEstado : nombresEstados) {//para todo estado del conjunto
-                if (nombreEstado.equals(this.initial_state().name())) {//si el estado evaluado no es el estado inicial
+                if (!nombreEstado.equals(this.initial_state().name())) {//si el estado evaluado no es el estado inicial
                     boolean alcanzable = false;
                     for (Triple<State, Character, State> transicion : transiciones) {//vemos si hay alguna transicion que llegue a el
                         alcanzable = alcanzable || (transicion.third().name().equals(nombreEstado));//si alguna transicion llega al estado, es alcanzable
