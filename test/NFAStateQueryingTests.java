@@ -1,4 +1,3 @@
-package test;
 
 import static org.junit.Assert.*;
 
@@ -9,14 +8,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import utils.Triple;
-import automata.FA;
-import automata.NFALambda;
+import automata.NFA;
 import automata.State;
 
 
-public class NFALambdaStateQueryingTests {
+public class NFAStateQueryingTests {
 
-	private NFALambda dummy_nfa;
+	private NFA dummy_nfa;
 	
 	private State s0;
 	
@@ -48,7 +46,7 @@ public class NFALambdaStateQueryingTests {
 		transitions.add(new Triple(s2, 'a', s0));
 		transitions.add(new Triple(s0, 'b', s0));
 		transitions.add(new Triple(s1, 'b', s1));
-		transitions.add(new Triple(s2, FA.Lambda, s2));
+		transitions.add(new Triple(s2, 'b', s2));
 		initial = s0;
 		finals.add(s1);
 		
@@ -56,7 +54,7 @@ public class NFALambdaStateQueryingTests {
 		this.s1 = s1;
 		this.s2 = s2;
 		
-		dummy_nfa = new NFALambda(states, alpha, transitions, initial, finals);
+		dummy_nfa = new NFA(states, alpha, transitions, initial, finals);
 	}
 	
 	@Test
@@ -80,9 +78,7 @@ public class NFALambdaStateQueryingTests {
 		Set<Character> _set = new HashSet<Character>();
 		_set.add('a');
 		_set.add('b');
-        _set.add(FA.Lambda);
-		assertTrue(dummy_nfa.alphabet().equals(_set));
-		assertTrue(dummy_nfa.alphabet().contains(FA.Lambda));
+		assertTrue(dummy_nfa.alphabet().equals(_set));	
 	}	
 	
 	@Test

@@ -1,5 +1,3 @@
-package test;
-
 import static org.junit.Assert.*;
 
 import java.util.HashSet;
@@ -183,9 +181,9 @@ public class DFACreationTests {
 	
 	@Test
 	public void test1() throws Exception {
-		FA dfa1 = FA.parse_form_file("test/test/dfa1.dot");
-		FA dfa2 = FA.parse_form_file("test/test/dfa2.dot");
-		FA dfa3 = FA.parse_form_file("test/test/dfa3.dot");
+		FA dfa1 = FA.parse_form_file("test/dfa1.dot");
+		FA dfa2 = FA.parse_form_file("test/dfa2.dot");
+		FA dfa3 = FA.parse_form_file("test/dfa3.dot");
 		assertTrue(dfa1 instanceof DFA);
 		assertTrue(dfa2 instanceof DFA);
 		assertTrue(dfa3 instanceof DFA);

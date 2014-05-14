@@ -1,4 +1,3 @@
-package test;
 
 import static org.junit.Assert.*;
 
@@ -9,20 +8,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import utils.Triple;
-import automata.NFA;
+import automata.DFA;
 import automata.State;
 
 
-public class NFAStateQueryingTests {
+public class DFAStateQueryingTests {
 
-	private NFA dummy_nfa;
-	
-	private State s0;
-	
-	private State s1;
-	
-	private State s2;
-	
+	private DFA dummy_dfa;
 	
 	@Before
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -43,7 +35,6 @@ public class NFAStateQueryingTests {
 		alpha.add('b');
 		transitions.add(new Triple(s0, 'a', s1));
 		transitions.add(new Triple(s1, 'a', s2));
-		transitions.add(new Triple(s1, 'b', s2));
 		transitions.add(new Triple(s2, 'a', s0));
 		transitions.add(new Triple(s0, 'b', s0));
 		transitions.add(new Triple(s1, 'b', s1));
@@ -51,26 +42,22 @@ public class NFAStateQueryingTests {
 		initial = s0;
 		finals.add(s1);
 		
-		this.s0 = s0;
-		this.s1 = s1;
-		this.s2 = s2;
-		
-		dummy_nfa = new NFA(states, alpha, transitions, initial, finals);
+		dummy_dfa = new DFA(states, alpha, transitions, initial, finals);
 	}
 	
 	@Test
 	public void test1() {
-		assertTrue(dummy_nfa.states().size() == 3);	
+		assertTrue(dummy_dfa.states().size() == 3);	
 	}
 	
 	@Test
 	public void test2() {
-		assertTrue(dummy_nfa.states().contains(dummy_nfa.initial_state()));	
+		assertTrue(dummy_dfa.states().contains(dummy_dfa.initial_state()));	
 	}
 	
 	@Test
 	public void test3() {
-		assertTrue(dummy_nfa.states().containsAll(dummy_nfa.final_states()));	
+		assertTrue(dummy_dfa.states().containsAll(dummy_dfa.final_states()));	
 	}
 	
 	
@@ -79,14 +66,27 @@ public class NFAStateQueryingTests {
 		Set<Character> _set = new HashSet<Character>();
 		_set.add('a');
 		_set.add('b');
-		assertTrue(dummy_nfa.alphabet().equals(_set));	
+		assertTrue(dummy_dfa.alphabet().equals(_set));	
 	}	
 	
 	@Test
 	public void test5() {
-		assertTrue(dummy_nfa.delta(s0, 'a').size() == 1);
-		assertTrue(dummy_nfa.delta(s1, 'b').size() == 2);
+		State s0 = dummy_dfa.initial_state();
+		State s1 = dummy_dfa.delta(s0, 'a');
+		State s2 = dummy_dfa.delta(s1, 'a');
+		
+		assertEquals(dummy_dfa.delta(s0, 'b'),s0);
+		assertEquals(dummy_dfa.delta(s1, 'b'),s1);
+		assertEquals(dummy_dfa.delta(s2, 'b'),s2);
 	}	
-			
+	
+	@Test
+	public void test6() {
+		State s0 = dummy_dfa.initial_state();
+		State s1 = dummy_dfa.delta(s0, 'a');
+		State s2 = dummy_dfa.delta(s1, 'a');
+		
+		assertEquals(dummy_dfa.delta(s2, 'a'),s0);	
+	}		
 		
 }
