@@ -119,11 +119,11 @@ public class DFA extends FA {
         assert rep_ok();
         assert string != null;
         assert verify_string(string);
-        if (rep_ok() && (string != null) && verify_string(string)) {
-            LinkedList<State> estadosFinales = new LinkedList(estados_finales);
-            State resultadoDeltaAcum = deltaAcumulada(inicial, string);
+        if (rep_ok() && (string != null) && verify_string(string)) {//si la representacion es correcta y la string es valida
+            LinkedList<State> estadosFinales = new LinkedList(estados_finales); //obtenemos los estados finales del automata
+            State resultadoDeltaAcum = deltaAcumulada(inicial, string); //calculamos la delta acumulada desde el estado inicial con la cadena
             boolean result = false;
-            if (!resultadoDeltaAcum.name().equals("")) {
+            if (!resultadoDeltaAcum.name().equals("")) { //y luego verificamos si el estado al que se llego con la delta acumulada es un estado final
                 for (int i = 0; i < estadosFinales.size(); i++) {
                     State unFinal = estadosFinales.get(i);
                     result = result || (resultadoDeltaAcum.name().equals(unFinal.name()));
@@ -166,7 +166,7 @@ public class DFA extends FA {
         //deltaLambda.add(noDet);
         Set<Character> alfabetoLambda = this.alphabet();
         alfabetoLambda.add(Lambda);
-        NFALambda result = new NFALambda(this.states(), alfabetoLambda, delta, this.inicial, this.final_states());
+        NFALambda result = new NFALambda(this.states(), alfabetoLambda, this.delta, this.inicial, this.final_states());
         return result;
     }
 

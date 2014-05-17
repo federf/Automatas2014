@@ -300,7 +300,12 @@ public class NFALambda extends FA {
         }
 
         for (Triple<State, Character, State> t : delta) { //verificamos que las transiciones son validas 
+            System.out.println(t.first().name() + " " + t.second() + " " + t.third().name());
+            if(!t.second().equals(Lambda)){//si no es una transicion lambda verificamos que todos sus elementos sean correctos
             transicionesOk = transicionesOk && (states.contains(t.first().name()) && states.contains(t.third().name()) && alfabeto.contains(t.second())); // (los estados utilizados pertenecen al conjunto de estados y el simbolo utilizado pertenece al alfabeto)
+            }else{
+                transicionesOk = transicionesOk && (states.contains(t.first().name()) && states.contains(t.third().name()));//si es una transicion lambda solo verificamos los estados
+            }
         }
         System.out.println("transOk: " + transicionesOk + " finalesOk: " + finalesOk + " inicOk: " + inicOk);
 
@@ -354,15 +359,14 @@ public class NFALambda extends FA {
      Al inicio se le pasaria un conj que contiene el estado inicial
      */
     public Set<State> deltaAcumulada(Set<State> est, String string) { //CONSULTAR TRATAMIENTO POR LAMBDA!!!! FALTA AGREGARLO, EL QUE ESTA ES EL TRATAMIENTO DEL NFA SIN LAMBDA
-        
-        
+
         System.out.println("");
-        if(!string.isEmpty()){
-            System.out.println("caracter: "+string.charAt(0));
-        }else{
+        if (!string.isEmpty()) {
+            System.out.println("caracter: " + string.charAt(0));
+        } else {
             System.out.println("caracter: vacio");
         }
-        
+
         System.out.println("est:");
         System.out.print("{");
         for (State s : est) {
