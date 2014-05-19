@@ -508,7 +508,7 @@ public class DFA extends FA {
      * @returns a new DFA accepting the
      * intersection of both languages.
      */
-    public DFA intersection(DFA other) {
+    public DFA intersection(DFA other) { //VERIFICAR
         assert rep_ok();
         assert other.rep_ok();
         // TODO
@@ -522,16 +522,16 @@ public class DFA extends FA {
             //creamos estados combinando los nombres de los estados de ambos automatas
             for (State s1 : this.states()) {
                 for (State s2 : other.states()) {
-                    for (Character c : this.alphabet()) {
-                        //para aquellos en que haya transicion definida en ambos automatas
-                        if (this.tieneTransicion(s1, c) && other.tieneTransicion(s2, c)) {
+                    //for (Character c : this.alphabet()) {
+                        //para aquellos en que haya transicion definida en ambos automatas para c
+                        //if (this.tieneTransicion(s1, c) && other.tieneTransicion(s2, c)) {
                             //creamos el estado nuevo
                             String nuevoEstadoNombre = "{" + s1.name() + "," + s2.name() + "}";
                             State nuevoEstado = new State(nuevoEstadoNombre);
                             //creamos el nuevo conjunto de estados
                             nuevosEstados.add(nuevoEstado);
-                        }
-                    }
+                        //}
+                    //}
                 }
             }
             LinkedList<String> nombresNuevosEstados = new LinkedList();

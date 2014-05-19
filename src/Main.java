@@ -46,7 +46,6 @@ public class Main {
             DFA union = dfa2.union(dfa3);
             System.out.println("acepta a?: "+union.accepts("a")+" acepta bbbb?: "+union.accepts("bbbb"));
             
-            
 
         } catch (Exception e) { //Catch de excepciones
             System.err.println("Ocurrio un error: " + e.getMessage());
