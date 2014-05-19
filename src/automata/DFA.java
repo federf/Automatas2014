@@ -523,14 +523,14 @@ public class DFA extends FA {
             for (State s1 : this.states()) {
                 for (State s2 : other.states()) {
                     //for (Character c : this.alphabet()) {
-                        //para aquellos en que haya transicion definida en ambos automatas para c
-                        //if (this.tieneTransicion(s1, c) && other.tieneTransicion(s2, c)) {
-                            //creamos el estado nuevo
-                            String nuevoEstadoNombre = "{" + s1.name() + "," + s2.name() + "}";
-                            State nuevoEstado = new State(nuevoEstadoNombre);
-                            //creamos el nuevo conjunto de estados
-                            nuevosEstados.add(nuevoEstado);
-                        //}
+                    //para aquellos en que haya transicion definida en ambos automatas para c
+                    //if (this.tieneTransicion(s1, c) && other.tieneTransicion(s2, c)) {
+                    //creamos el estado nuevo
+                    String nuevoEstadoNombre = "{" + s1.name() + "," + s2.name() + "}";
+                    State nuevoEstado = new State(nuevoEstadoNombre);
+                    //creamos el nuevo conjunto de estados
+                    nuevosEstados.add(nuevoEstado);
+                    //}
                     //}
                 }
             }
@@ -648,7 +648,7 @@ public class DFA extends FA {
             transicionesOk = transicionesOk && (states.contains(t.first().name()) && states.contains(t.third().name()) && alfabeto.contains(t.second()));
         }
         //ciclo para determinar si el automata es deterministico o no
-        for (int i = 0; i < transiciones.size(); i++) { 
+        for (int i = 0; i < transiciones.size(); i++) {
             for (int j = 0; j < transiciones.size(); j++) {
                 if (i != j) {
                     Triple<State, Character, State> elem1 = transiciones.get(i);
@@ -713,10 +713,117 @@ public class DFA extends FA {
                 if (!result.contains(transicion.third())) {
                     //agregamos el estado al cual se dirige siempre que 
                     // no este ya contenido en el conjunto resultado
-                    result.add(transicion.third()); 
+                    result.add(transicion.third());
                 }
             }
         }
         return result;
     }
+
+    public Set<Triple<State, Character, State>> transiciones() {
+        return this.delta;
+    }
+
+    //metodo que dado un automata y su conjunto de transiciones, elimina los estados inalcanzables
+    /*public DFA limpiarAutomata(Set<Triple<State, Character, State>> transiciones) {
+        //nuevo conjunto de transiciones, el cual se modificara y sera parte del resultado
+        LinkedList<Triple<State, Character, State>> nuevasTransiciones = new LinkedList(transiciones);
+        //lista de estados (nombres de estados)
+        LinkedList<String> nombresEstados = new LinkedList();
+        //nueva lista de estados para el DFA resultado
+        LinkedHashSet<State> nuevosEstados = new LinkedHashSet();
+        //nueva lista de estados de estados para el DFA resultado
+        LinkedHashSet<State> nuevosEstadosFinales = new LinkedHashSet(this.final_states());
+        //obtenemos los nombres de los estados
+        for (State s : this.states()) {
+            nombresEstados.add(s.name());
+        }
+        //lista de nombres de estados, a modificar, o sea el resultado de quitar algunos estados inalcanzables
+        LinkedList<String> nombresModificados = new LinkedList();
+        //mientras sean diferentes, es decir, si se lo modifica vuelve a ciclar
+        while (!nombresModificados.equals(nombresEstados)) {
+            System.out.println();
+            System.out.println("entro");
+            System.out.println("nombresEstados antes de entrar a modificar: " + nombresEstados.toString());
+            //igualamos las listas de nombres
+            nombresModificados = new LinkedList(nombresEstados);
+            nombresEstados = new LinkedList(nombresModificados);
+            System.out.println("igualados?: " + nombresEstados.equals(nombresModificados));
+            //y comenzamos a verificar si la lista puede minimizarse, es decir, borrar estados inalcanzables
+            //para todo estado del conjunto
+            for (String s : nombresEstados) {
+                if (!s.equals("{}")) {
+                    System.out.println();
+                    System.out.println("Estado actual: " + s);
+                    int i = nombresEstados.indexOf(s);
+                    System.out.println("indice: "+i);
+                    //si el estado evaluado no es el estado inicial
+                    if (!nombresEstados.get(i).equals(this.initial_state().name())) {
+                        System.out.println("entro al if");
+                        //variable booleana que indica si un estado es alcanzable desde algun otro estado
+                        boolean alcanzable = false;
+                        //vemos si hay alguna transicion que llegue a el
+                        for (Triple<State, Character, State> transicion : nuevasTransiciones) {
+                            //si alguna transicion llega al estado, es alcanzable
+                            System.out.println("transicion: " + transicion.first().name() + " -> " + transicion.second() + " -> " + transicion.third().name());
+                            if (transicion.third().name().equals(nombresEstados.get(i))) {
+                                alcanzable = true;
+                            }
+                            //alcanzable = alcanzable || transicion.third().name().equals(nombresEstados.get(i));
+                        }
+                        System.out.println("salio de alcanzable");
+                        System.out.println("estado: " + nombresEstados.get(i) + " alcanzable? " + alcanzable);
+                        //si no es alcanzable se elimina el estado de la lista
+                        if (!alcanzable) {
+                            System.out.println("cantidad de estados antes " + nombresEstados.size());
+                            nombresModificados.remove(i);
+                            System.out.println("cantidad de estados despues " + nombresEstados.size());
+                            System.out.println("estado inalcanzable " + nombresEstados.get(i) + " removido exitosamente? " + !nombresModificados.contains(nombresEstados.get(i)));
+                        //y eliminamos todas las transiciones que salian desde dicho estado
+                            //lista de transiciones a eliminar
+                            LinkedList<Triple<State, Character, State>> transARemover = new LinkedList();
+                            //vemos que transiciones debemos eliminar
+                            for (Triple<State, Character, State> t : nuevasTransiciones) {
+                                if (t.first().name().equals(nombresEstados.get(i))) {
+                                    //System.out.println(t.first().name() + " -> " + t.second() + " -> " + t.third().name());
+                                    transARemover.add(t);
+                                }
+                            }
+                            System.out.println("cantidad de transiciones a remover " + transARemover.size());
+                            System.out.println("cantidad de transiciones antes: " + nuevasTransiciones.size());
+                            nuevasTransiciones.removeAll(transARemover);
+                            System.out.println("cantidad de transiciones despues: " + nuevasTransiciones.size());
+                        }
+
+                    }
+                }
+            }
+            System.out.println("nombresModificados: " + nombresModificados.toString());
+
+        }
+        //creamos el nuevo conjunto de estados minimizado (sin los estados inalcanzables)
+        for (String nombre : nombresEstados) {
+            State estado = new State(nombre);
+            nuevosEstados.add(estado);
+        }
+        //vemos que estados finales fueron removidos del conjunto de estados
+        for (State estadoFinal : nuevosEstadosFinales) {
+            boolean contenido = false;
+            //vemos para todo estado del nuevo conjunto de estados
+            for (State s : nuevosEstados) {
+                //si el final corriente esta en el conjunto de estados
+                if (estadoFinal.name().equals(s.name())) {
+                    contenido = true;
+                }
+            }
+            //si el estado final evaluado no pertenece al nuevo conjunto de estados, se elimina
+            if (!contenido) {
+                nuevosEstadosFinales.remove(estadoFinal);
+            }
+        }
+        //nuevo conjunto de transiciones
+        LinkedHashSet<Triple<State, Character, State>> nuevaDelta = new LinkedHashSet(nuevasTransiciones);
+        //creamos el DFA resultado
+        return new DFA(nuevosEstados, this.alphabet(), nuevaDelta, this.initial_state(), nuevosEstadosFinales);
+    }*/
 }

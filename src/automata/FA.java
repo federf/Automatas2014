@@ -359,19 +359,19 @@ public abstract class FA {
      metodo que dado un conjunto (set) de estados retorna su conjunto potencia
      */
     public static <State> Set<Set<State>> powerSet(Set<State> list) {
-        Set<Set<State>> ps = new HashSet<Set<State>>();
-        ps.add(new HashSet<State>());   // add the empty set
+        Set<Set<State>> ps = new LinkedHashSet<Set<State>>();
+        ps.add(new LinkedHashSet<State>());   // add the empty set
 
         // for every item in the original list
         for (State item : list) {
-            Set<Set<State>> newPs = new HashSet<Set<State>>();
+            Set<Set<State>> newPs = new LinkedHashSet<Set<State>>();
 
             for (Set<State> subset : ps) {
                 // copy all of the current powerset's subsets
                 newPs.add(subset);
 
                 // plus the subsets appended with the current item
-                Set<State> newSubset = new HashSet<State>(subset);
+                Set<State> newSubset = new LinkedHashSet<State>(subset);
                 newSubset.add(item);
                 newPs.add(newSubset);
             }
@@ -430,48 +430,4 @@ public abstract class FA {
         }
     }
 
-    //metodo que dado un automata y su conjunto de transiciones, elimina los estados inalcanzables
-    public void limpiarAutomata(Set<Triple<State, Character, State>> transiciones) {
-        LinkedList<String> nombresEstados = new LinkedList();//lista de estados (nombres de estados)
-        for (State s : this.states()) { //obtenemos los nombres de los estados
-            nombresEstados.add(s.name());
-        }
-        LinkedList<String> nombresModificados = new LinkedList();//lista de nombres de estados, a modificar
-        while (!nombresModificados.equals(nombresEstados)) {//mientras sean diferentes, es decir, si se lo modifica vuelve a ciclar
-            nombresModificados = new LinkedList(nombresEstados);//igualamos las listas de nombres
-            nombresEstados = new LinkedList(nombresModificados);//y comenzamos a verificar si la lista puede minimizarse, es decir, borrar estados inalcanzables
-            for (String nombreEstado : nombresEstados) {//para todo estado del conjunto
-                if (!nombreEstado.equals(this.initial_state().name())) {//si el estado evaluado no es el estado inicial
-                    boolean alcanzable = false;
-                    for (Triple<State, Character, State> transicion : transiciones) {//vemos si hay alguna transicion que llegue a el
-                        alcanzable = alcanzable || (transicion.third().name().equals(nombreEstado));//si alguna transicion llega al estado, es alcanzable
-                    }
-                    if (!alcanzable) {//si no es alcanzable se elimina el estado de la lista
-                        nombresModificados.remove(nombreEstado);
-                        for (Triple<State, Character, State> transicion : transiciones) {//y eliminamos todas las transiciones que salian desde dicho estado
-                            if (transicion.first().name().equals(nombreEstado)) {
-                                transiciones.remove(transicion);//si se encuentra una transicion cuyo 1er estado es el removido, se la elimina
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        LinkedHashSet<State> nuevosEstados = new LinkedHashSet();//nuevo conjunto de estados
-        for (String nombre : nombresEstados) {//creamos el nuevo conjunto de estados minimizado (sin los estados inalcanzables)
-            State estado = new State(nombre);
-            nuevosEstados.add(estado);
-        }
-        for (State estadoFinal : this.final_states()) { //verificamos cuales estados finales fueron quitados en caso de que se haya quitado alguno
-            boolean contenido = false;
-            for (State s : nuevosEstados) {
-                contenido = contenido || (estadoFinal.name().equals(s.name()));
-            }
-            if (!contenido) {//si el estado final evaluado no pertenece al nuevo conjunto de estados, se elimina
-                this.final_states().remove(estadoFinal);
-            }
-        }
-        this.states().clear();//vaciamos el conjunto de estados del automata original
-        this.states().addAll(nuevosEstados); //y lo actualizamos al nuevo (sin estados inalcanzables)
-    }
 }
