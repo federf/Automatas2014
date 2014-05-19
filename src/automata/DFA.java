@@ -80,10 +80,8 @@ public class DFA extends FA {
                         result = (actual.third());
                     }
                 }
-                //System.out.println("resultado desde " + from.name() + " con " + c + ": " + result.name());
                 return result;
             } else {
-                //System.out.println("no hay transicion desde " + from.name() + " con " + c);
                 return new State("");
             }
         } else {
@@ -227,7 +225,7 @@ public class DFA extends FA {
      * @returns True iff the automaton's
      * language is finite.
      */
-    public boolean is_finite() {
+    public boolean is_finite() {// VERIFICAR, ENCONTRE UN CONTRAEJEMPLO
 
         assert rep_ok();
         boolean condicion = true;
@@ -313,7 +311,7 @@ public class DFA extends FA {
         LinkedHashSet<Triple<State, Character, State>> transInicial = new LinkedHashSet();//lista de transiciones que inician en el estado inicial
         for (Triple<State, Character, State> t : this.delta) {//vemos que transiciones salian del estado inicial
             if (t.first().name().equals(this.inicial.name())) {
-                transInicial.add(t) ;
+                transInicial.add(t);
             }
         }
         for (Triple<State, Character, State> t : transInicial) { //a todo estado final le agregamos transiciones como las del estado inicial
@@ -342,18 +340,16 @@ public class DFA extends FA {
         State nuevoInicial = new State("{" + this.inicial.name() + "," + other.inicial.name() + "}"); // nuevo estado inicial
         LinkedHashSet<State> nuevosEstados = new LinkedHashSet(); //nueva lista de estados del DFA union
         LinkedHashSet<Triple<State, Character, State>> nuevasTransiciones = new LinkedHashSet();//nuevo conjunto de transiciones del DFA union
-        for (State s1 : this.states()) {
-            for (State s2 : other.states()) {
+        LinkedList<String> nombresNuevosEstados = new LinkedList();//lista de nombres de los nuevos estados del automata union
+        for (State s1 : this.states()) {//para todo estado del 1er automata
+            for (State s2 : other.states()) { //y todo estado del 2do
+                //creo un estado combinando un estado del 1er automata con uno del 2do automata
                 String nuevoEstadoNombre = "{" + s1.name() + "," + s2.name() + "}";
+                nombresNuevosEstados.add(nuevoEstadoNombre);
                 State nuevoEstado = new State(nuevoEstadoNombre);
                 nuevosEstados.add(nuevoEstado);//creamos el nuevo conjunto de estados
             }
         }
-        LinkedList<String> nombresNuevosEstados = new LinkedList();
-        for (State s : nuevosEstados) {
-            nombresNuevosEstados.add(s.name());
-        }
-
         State resultDelta1 = new State("");//deltas resultado de aplicar a cada estado todo el alfabeto
         State resultDelta2 = new State("");
         State resultDeltaCombinado = new State("");//resultado combinado de ambas deltas (nuevo estado combinado)
@@ -363,6 +359,9 @@ public class DFA extends FA {
         for (State s1 : this.states()) { //ciclo para crear el conjunto de transiciones
             for (State s2 : other.states()) {
                 for (Character c : nuevoAlfabetoUnion) {
+
+                    System.out.println();
+
                     resultDelta1 = this.delta(s1, c); //calculamos la delta de cada estado
                     resultDelta2 = other.delta(s2, c); //con cada caracter del alfabeto
                     if (!resultDelta1.name().equals("") || !resultDelta2.name().equals("")) { //solo agregamos al conjunto de transiciones, aquellas que modifican al menos un estado
@@ -372,12 +371,13 @@ public class DFA extends FA {
                         if (resultDelta2.name().equals("")) {
                             resultDelta2 = s2;
                         }
+                        String nombreCombinado = "{" + resultDelta1.name() + "," + resultDelta2.name() + "}";//nombre del estado resultado de ambas deltas
                         State from = new State("{" + s1.name() + "," + s2.name() + "}");//estado combinado desde donde sale la nueva transicion
-                        String nombreCombinado = "{" + resultDelta1.name() + "," + resultDelta2.name() + "}";//crea un nuevo estado con el nombre combinado de los resultados
+                        resultDeltaCombinado = new State(nombreCombinado);//estado combinado hacia donde llega la nueva transicion
                         if (!nombresNuevosEstados.contains(nombreCombinado)) { //y en caso de no estar en el conjunto de estados, lo crea y lo agrega
-                            resultDeltaCombinado = new State(nombreCombinado);//estado combinado hacia donde llega la nueva transicion
+                            nombresNuevosEstados.add(nombreCombinado);
+                            nuevosEstados.add(resultDeltaCombinado);
                         }
-
                         Triple<State, Character, State> nuevaTransicion = new Triple(from, c, resultDeltaCombinado); //nueva transicion
                         nuevasTransiciones.add(nuevaTransicion); //agregamos la transicion al conjunto de transiciones
                     }
@@ -590,5 +590,9 @@ public class DFA extends FA {
             }
         }
         return result;
+    }
+
+    public Set<Triple<State, Character, State>> transiciones() {
+        return this.delta;
     }
 }
