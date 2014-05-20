@@ -128,7 +128,7 @@ public class DFA extends FA {
             //obtenemos los estados finales del automata
             LinkedList<State> estadosFinales = new LinkedList(estados_finales);
             //calculamos la delta acumulada desde el estado inicial con la cadena
-            State resultadoDeltaAcum = deltaAcumulada(inicial, string);
+            State resultadoDeltaAcum = deltaAcumulada(this.initial_state(), string);
             boolean result = false;
             //y luego verificamos si el estado al que se 
             // llego con la delta acumulada es un estado final
@@ -661,12 +661,12 @@ public class DFA extends FA {
                 }
             }
         }
+
         return (inicOk && finalesOk && transicionesOk && noLambda && deterministicOk);
 
     }
 
     public State deltaAcumulada(State est, String string) {
-        System.out.println("");
         //si la cadena es valida y el estado tambien
         if (est != null && !string.isEmpty()) {
             State result = est;

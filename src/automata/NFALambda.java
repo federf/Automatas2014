@@ -186,79 +186,161 @@ public class NFALambda extends FA {
         // TODO
 
         LinkedList<String> finalesOriginales = new LinkedList();
-        for (State s : this.final_states()) {//obtenemos los nombres de los estados finales originales para comparacion
+        //obtenemos los nombres de los estados finales originales para comparacion
+        for (State s : this.final_states()) {
             finalesOriginales.add(s.name());
         }
-        State q0 = new State(inicial.name()); //crea un nuevo estado inicial para el AFD
-        Set<Set<State>> conjPotencia = FA.powerSet(this.states());//conjunto potencia de los estados del NFA original
-        Set<Set<State>> nuevosEstadosFinales = new LinkedHashSet();//lista de nuevos estados finales
+        //crea un nuevo estado inicial para el AFD
+        //set resultado de clausura, para calculo clausura lambda del estado inicial del automata
+        //original
+        LinkedHashSet<State> clausuraPrimerElem = new LinkedHashSet();
+        //clausuramos el resultado obtenido
+        //lista para calculo clausura lambda
+        LinkedList<Triple<State, Character, State>> listPrimerElem = new LinkedList();
+        clausuraPrimerElem = new LinkedHashSet(clausuraLambda(this.initial_state(), listPrimerElem));
+        String nombreInicial = "{";
+        for (State s : clausuraPrimerElem) {
+            nombreInicial = nombreInicial + s.name() + " ";
+        }
+        nombreInicial = nombreInicial + "}";
+        State q0 = new State(nombreInicial);
+        //conjunto potencia de los estados del NFA original-//lista de conjuntos de estados
+        Set<Set<State>> conjPotencia = FA.powerSet(this.states());
+        LinkedHashSet<Set<State>> newConjPotencia = new LinkedHashSet(conjPotencia);
+        //lista de nuevos estados finales
+        Set<Set<State>> nuevosEstadosFinales = new LinkedHashSet();
         for (Set<State> set : conjPotencia) {
-            LinkedList<String> nombresEstadosSet = new LinkedList();//lista de nombres de los estados del set
+            //lista de nombres de los estados del set
+            LinkedList<String> nombresEstadosSet = new LinkedList();
             for (State estado : set) {
+                //obtenemos los nombres de los estados de cada set
                 nombresEstadosSet.add(estado.name());
             }
             boolean esFinal = false;
+            //vemos si alguno era final en el automata original
             for (String finalNuevo : nombresEstadosSet) {
                 esFinal = esFinal || (finalesOriginales.contains(finalNuevo));
             }
-            if (esFinal) {//si el conj contiene almenos uno de los estados finales del automata original
-                nuevosEstadosFinales.add(set);//lo agregamos al conj de nuevos estados finales
+            //si el conj contiene almenos uno de los estados finales del automata original
+            if (esFinal) {
+                //lo agregamos al conj de nuevos estados finales
+                nuevosEstadosFinales.add(set);
             }
         }
+        //creamos el nuevo alfabeto sin lambda
+        LinkedHashSet<Character> nuevoAlfabeto = new LinkedHashSet(this.alphabet());
+        nuevoAlfabeto.remove(Lambda);
 
+        //nueva lista de transiciones de set de estados en set de estados
         LinkedHashSet<Triple<Set<State>, Character, Set<State>>> nuevasTransiciones = new LinkedHashSet();
         for (Set<State> set : conjPotencia) {
-            for (Character c : this.alphabet()) {
-                LinkedHashSet<State> resultadoSet = new LinkedHashSet();//resultado de aplicar un caracter a un set de estados
+            for (Character c : nuevoAlfabeto) {
+                //if (!c.equals(Lambda)) {
+                //resultado de aplicar un caracter a un set de estados
+                LinkedHashSet<State> resultadoSet = new LinkedHashSet();
                 for (State estado : set) {
-                    Set<State> delta = delta(estado, c);//calculamos la delta de cada estado del conjunto con el caracter actual
-                    resultadoSet = (LinkedHashSet<State>) unirConjuntosEstados(resultadoSet, delta); //unimos los resultados en un mismo conjunto resultado
+                    //calculamos la delta de cada estado del conjunto con el caracter actual
+                    Set<State> deltaUnConjunto = delta(estado, c);
+                    //set para almacenar el resultado de aplicar la clausura lambda al resultado parcial obtenido
+                    LinkedHashSet<State> resultadoClausura = new LinkedHashSet();
+                    //clausuramos el resultado obtenido
+                    for (State s : deltaUnConjunto) {
+                        //lista para calculo clausura lambda
+                        LinkedList<Triple<State, Character, State>> list = new LinkedList();
+                        resultadoClausura = (LinkedHashSet<State>) unirConjuntosEstados(resultadoClausura, clausuraLambda(s, list));
+                    }
+                    //unimos los resultados en un mismo conjunto resultado
+                    resultadoSet = (LinkedHashSet<State>) unirConjuntosEstados(resultadoSet, resultadoClausura);
+
                 }
-                Triple<Set<State>, Character, Set<State>> transicion = new Triple(set, c, resultadoSet); //creamos la transicion
-                nuevasTransiciones.add(transicion); //y la agregamos al conjunto de transiciones
+                //si el resultado obtenido no es vacio
+                if (!resultadoSet.isEmpty()) {
+                    //para todo conjunto de estados del conjunto potencia
+                    for (Set<State> conj : newConjPotencia) {
+                            //vemos si el resultado obtenido ya esta presente, ya sea con el mismo orden
+                        // de elementos o como permutacion de alguno
+                        if (conjEstadosIguales(conj, resultadoSet)) {
+                            resultadoSet = (LinkedHashSet<State>) conj;
+                        }
+                    }
+                    //creamos la nueva transicion
+                    Triple<Set<State>, Character, Set<State>> transicion = new Triple(set, c, resultadoSet);
+                    //y la agregamos al conjunto de transiciones
+                    nuevasTransiciones.add(transicion);
+                }
+                //}
             }
         }
 
-        LinkedList<Set<State>> listaConjEstados = new LinkedList(conjPotencia);//lista de conjuntos de estados
-        System.out.println("cuanto tiene?: " + conjPotencia.size());
+        //lista de sets de estados
+        LinkedList<Set<State>> listaSetEstados = new LinkedList(conjPotencia);
+        //lista de estados
+        LinkedList<State> nuevosEstadosSimples = new LinkedList();
 
-        /**
-         * ****************************COMIENZO
-         * TRANSFORMAR CONJ ESTADOS EN
-         * ESTADOS*************************************
-         */
-        LinkedList<State> listaEstados = new LinkedList();//lista de estados
-        for (int i = 0; i < listaConjEstados.size(); i++) {
-            State nuevo = new State("q" + i); //creamos estados equivalentes
-            listaEstados.add(nuevo);
-        }
-        LinkedHashSet<Triple<State, Character, State>> transicionesEstados = new LinkedHashSet();//nueva lista de transiciones
-        for (Triple<Set<State>, Character, Set<State>> transicionSets : nuevasTransiciones) {//para todas las transiciones de set de estados en set de estados
-            int indicePrimero = 0; //indices del 1er y 3er elementos de la transicion actual
-            int indiceTercero = 0;
-            for (int i = 0; i < listaConjEstados.size(); i++) {//ciclo para buscar el indice en que esta guardado el set de estados corriente
-                if (conjEstadosIguales(transicionSets.first(), listaConjEstados.get(i))) {
-                    indicePrimero = i;
-                }
-                if (conjEstadosIguales(transicionSets.third(), listaConjEstados.get(i))) {
-                    indiceTercero = i;
-                }
-                Triple<State, Character, State> transicionEstados = new Triple(listaEstados.get(indicePrimero), transicionSets.second(), listaEstados.get(indiceTercero));//creamos para cada transicion de sets en sets una de estado en estado equivalente
-                transicionesEstados.add(transicionEstados);
+        //lista de nombres de los nuevos estados simples
+        LinkedList<String> nombreNuevosEstadosSimples = new LinkedList();
+
+        //para cada set creamos un estado cuyo nombre combina el nombre de sus elementos
+        for (Set<State> set : listaSetEstados) {
+            String nombre = "{";
+            for (State s : set) {
+                nombre = nombre + s.name() + " ";
+            }
+            nombre = nombre + "}";
+            //si no se agrego aun el estado
+            // y el nombre del estado no es vacio, lo cual indicaria un conjunto vacio
+            // (el cual fue generado al generar el conj potencia de los estados del automata original)
+            if (!nombreNuevosEstadosSimples.contains(nombre) && !nombre.equals("{}")) {
+                //lo creamos y agregamos al conjunto de estados
+                State nuevo = new State(nombre);
+                nuevosEstadosSimples.add(nuevo);
+                nombreNuevosEstadosSimples.add(nombre);
             }
         }
+
+        //creamos transiciones equivalentes a las de set en set, pero de estado en estado
+        //lista de transiciones de estado en estado
+        LinkedList<Triple<State, Character, State>> transicionesSimples = new LinkedList();
+
+        for (Triple<Set<State>, Character, Set<State>> transSet : nuevasTransiciones) {
+            //nombre del primer conjunto de estados
+            String nombrePrimerSet = "{";
+            for (State s : transSet.first()) {
+                nombrePrimerSet = nombrePrimerSet + s.name() + " ";
+            }
+            nombrePrimerSet = nombrePrimerSet + "}";
+            //nombre del segundo conjunto de estados
+            String nombreSegundoSet = "{";
+            for (State s : transSet.third()) {
+                nombreSegundoSet = nombreSegundoSet + s.name() + " ";
+            }
+            nombreSegundoSet = nombreSegundoSet + "}";
+            //creamos y agregamos una transicion simple de estado a estado
+            //equivalente a la transicion de set en set evaluada
+            State primero = new State(nombrePrimerSet);
+            State segundo = new State(nombreSegundoSet);
+            Triple<State, Character, State> transicionNueva = new Triple(primero, transSet.second(), segundo);
+            transicionesSimples.add(transicionNueva);
+        }
+        //nuevo conjunto de transiciones de estado en estado
+        LinkedHashSet<Triple<State, Character, State>> transiciones = new LinkedHashSet(transicionesSimples);
 
         /**
          * ********************CREACION
          * CONJ DE ESTADOS
          * FINALES******************
          */
-        LinkedHashSet<State> listaEstadosFinales = new LinkedHashSet();//set de estados finales
-        for (Set<State> set : nuevosEstadosFinales) {//para todo set que es estado final
-            int indiceUnFinal = 0;//indice en que se ubica un set que es estado final
-            for (int i = 0; i < listaConjEstados.size(); i++) {
-                if (conjEstadosIguales(set, listaConjEstados.get(i))) {
-                    listaEstadosFinales.add(listaEstados.get(i));
+        //set de nuevos estados finales
+        LinkedHashSet<State> nuevosFinales = new LinkedHashSet();
+        //para todo estado del conjunto de estados, tal que contiene algun
+        //estado final del automata original, lo agregamos al nuevo conjunto de estados finales
+        for (State s : nuevosEstadosSimples) {
+            for (String nombreFinal : finalesOriginales) {
+                //si el nombre de uno de los nuevos estados
+                //contiene el nombre de algun estado final del automata original
+                if (s.name().contains(nombreFinal)) {
+                    //agregamos el estado al conjunto de estados finales
+                    nuevosFinales.add(s);
                 }
             }
         }
@@ -268,7 +350,12 @@ public class NFALambda extends FA {
          * DEL
          * DFA**********************************
          */
-        DFA result = new DFA(new LinkedHashSet(listaEstados), this.alphabet(), transicionesEstados, this.initial_state(), listaEstadosFinales);
+        DFA result = new DFA(new LinkedHashSet(nuevosEstadosSimples), nuevoAlfabeto, transiciones, q0, nuevosFinales);
+        /*
+         LIMPIAMOS EL AUTOMATA, ELIMINANDO ESTADOS INALCANZABLES Y LAS TRANSICIONES QUE SALGAN DE DICHOS ESTADOS
+         */
+        /*        result = result.limpiarAutomata(result.delta);
+         System.out.println("salio del limpiar");*/
         return result;
     }
 
@@ -289,7 +376,6 @@ public class NFALambda extends FA {
         for (State f : estados_finales) {  //buscamos los nombres de los estados finales
             finales.add(f.name());
         }
-        //System.out.println("estados finales: " + finales);
 
         for (int i = 0; i < states.size(); i++) { //verificamos que el estado inicial pertenece al conjunto de estados
             inicOk = inicOk || (states.get(i).equals(inicial.name()));
@@ -301,13 +387,12 @@ public class NFALambda extends FA {
 
         for (Triple<State, Character, State> t : delta) { //verificamos que las transiciones son validas 
             System.out.println(t.first().name() + " " + t.second() + " " + t.third().name());
-            if(!t.second().equals(Lambda)){//si no es una transicion lambda verificamos que todos sus elementos sean correctos
-            transicionesOk = transicionesOk && (states.contains(t.first().name()) && states.contains(t.third().name()) && alfabeto.contains(t.second())); // (los estados utilizados pertenecen al conjunto de estados y el simbolo utilizado pertenece al alfabeto)
-            }else{
+            if (!t.second().equals(Lambda)) {//si no es una transicion lambda verificamos que todos sus elementos sean correctos
+                transicionesOk = transicionesOk && (states.contains(t.first().name()) && states.contains(t.third().name()) && alfabeto.contains(t.second())); // (los estados utilizados pertenecen al conjunto de estados y el simbolo utilizado pertenece al alfabeto)
+            } else {
                 transicionesOk = transicionesOk && (states.contains(t.first().name()) && states.contains(t.third().name()));//si es una transicion lambda solo verificamos los estados
             }
         }
-        System.out.println("transOk: " + transicionesOk + " finalesOk: " + finalesOk + " inicOk: " + inicOk);
 
         return (inicOk && finalesOk && transicionesOk);
     }

@@ -2,6 +2,7 @@
 import automata.DFA;
 import automata.FA;
 import automata.NFA;
+import automata.NFALambda;
 import automata.State;
 import java.util.LinkedHashSet;
 import utils.Triple;
@@ -20,18 +21,17 @@ public class Main {
             nfa = (NFA) FA.parse_form_file("test/nfa2.dot");
             //NFAAutomataMethodsTests.test5 -OK
             System.out.println(nfa.accepts("aaaaaaaaaaaaaaa"));
-            
+
             // DFAAutomataMethodsTests.test14 -OK
             DFA dfa = (DFA) FA.parse_form_file("test/dfa3.dot");
             System.out.println("dfa interseccion su complemento, es vacio?: " + dfa.intersection(dfa.complement()).is_empty());
-          
+
             // DFAAutomataMethodsTests.test15 -OK
             DFA dfa2 = (DFA) FA.parse_form_file("test/dfa2.dot");
             DFA dfa3 = (DFA) FA.parse_form_file("test/dfa3.dot");
             DFA union = dfa2.union(dfa3);
-            System.out.println("acepta a?: "+union.accepts("a")+" acepta bbbb?: "+union.accepts("bbbb"));
-            
-            
+            System.out.println("acepta a?: " + union.accepts("a") + " acepta bbbb?: " + union.accepts("bbbb"));
+
             //IntegrationTests.test1 -OK
             DFA my_dfa = (DFA) FA.parse_form_file("test/dfa1.dot");
             System.out.println("1 -" + my_dfa.toNFALambda().accepts("ab"));
@@ -42,13 +42,20 @@ public class Main {
             System.out.println("dfa1 finito?: " + my_dfa.is_finite());
 
             //IntegrationTests.test2 -OK
-            NFA my_nfa=(NFA) FA.parse_form_file("test/nfa1.dot");
-            DFA my_dfa2=my_nfa.toDFA();
-            System.out.println("acepta ab?: "+my_dfa2.accepts("ab"));
-            System.out.println("acepta abaaaaa?: "+my_dfa2.accepts("abaaaaa"));
-            System.out.println("acepta abbbb?: "+my_dfa2.accepts("abbbb"));
-            System.out.println("acepta a?: "+my_dfa2.accepts("a"));
-            
+            NFA my_nfa = (NFA) FA.parse_form_file("test/nfa1.dot");
+            DFA my_dfa2 = my_nfa.toDFA();
+            System.out.println("acepta ab?: " + my_dfa2.accepts("ab"));
+            System.out.println("acepta abaaaaa?: " + my_dfa2.accepts("abaaaaa"));
+            System.out.println("acepta abbbb?: " + my_dfa2.accepts("abbbb"));
+            System.out.println("acepta a?: " + my_dfa2.accepts("a"));
+
+            //IntegrationTests.test3
+            NFALambda my_nfalambda = (NFALambda) FA.parse_form_file("test/nfalambda1.dot");
+            DFA dfa3 = my_nfalambda.toDFA();
+            System.out.println("acepta casa?: " + dfa3.accepts("casa"));
+            System.out.println("acepta asa?: " + dfa3.accepts("asa"));
+            System.out.println("acepta cas?: " + dfa3.accepts("cas"));
+            System.out.println("acepta asac?: " + dfa3.accepts("asac"));
 
         } catch (Exception e) { //Catch de excepciones
             System.err.println("Ocurrio un error: " + e.getMessage());
