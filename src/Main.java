@@ -51,11 +51,11 @@ public class Main {
 
             //IntegrationTests.test3
             NFALambda my_nfalambda = (NFALambda) FA.parse_form_file("test/nfalambda1.dot");
-            DFA dfa3 = my_nfalambda.toDFA();
-            System.out.println("acepta casa?: " + dfa3.accepts("casa"));
-            System.out.println("acepta asa?: " + dfa3.accepts("asa"));
-            System.out.println("acepta cas?: " + dfa3.accepts("cas"));
-            System.out.println("acepta asac?: " + dfa3.accepts("asac"));
+            DFA dfa4 = my_nfalambda.toDFA();
+            System.out.println("acepta casa?: " + dfa4.accepts("casa"));
+            System.out.println("acepta asa?: " + dfa4.accepts("asa"));
+            System.out.println("acepta cas?: " + dfa4.accepts("cas"));
+            System.out.println("acepta asac?: " + dfa4.accepts("asac"));
 
         } catch (Exception e) { //Catch de excepciones
             System.err.println("Ocurrio un error: " + e.getMessage());
