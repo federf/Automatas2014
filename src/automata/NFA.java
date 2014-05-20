@@ -216,7 +216,6 @@ public class NFA extends FA {
             }
         }
 
-        System.out.println("cuanto tiene?: " + conjPotencia.size());
         //lista de sets de estados
         LinkedList<Set<State>> listaSetEstados = new LinkedList(conjPotencia);
         //lista de estados
@@ -232,9 +231,10 @@ public class NFA extends FA {
                 nombre = nombre + s.name() + " ";
             }
             nombre = nombre + "}";
-            //System.out.println(nombre);
             //si no se agrego aun el estado
-            if (!nombreNuevosEstadosSimples.contains(nombre)) {
+            // y el nombre del estado no es vacio, lo cual indicaria un conjunto vacio
+            // (el cual fue generado al generar el conj potencia de los estados del automata original)
+            if (!nombreNuevosEstadosSimples.contains(nombre) && !nombre.equals("{}")) {
                 //lo creamos y agregamos al conjunto de estados
                 State nuevo = new State(nombre);
                 nuevosEstadosSimples.add(nuevo);
@@ -294,8 +294,6 @@ public class NFA extends FA {
          * DEL
          * DFA**********************************
          */
-        System.out.println("tiene " + nuevosEstadosSimples.size() + " estados");
-        System.out.println("llego hasta aca");
         DFA result = new DFA(new LinkedHashSet(nuevosEstadosSimples), this.alphabet(), transiciones, q0, nuevosFinales);
         /*
          LIMPIAMOS EL AUTOMATA, ELIMINANDO ESTADOS INALCANZABLES Y LAS TRANSICIONES QUE SALGAN DE DICHOS ESTADOS
