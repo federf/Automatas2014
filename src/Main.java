@@ -11,7 +11,7 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            /*//NFAAutomataMethodsTests.test1 -OK
+            //NFAAutomataMethodsTests.test1 -OK
             NFA nfa = (NFA) FA.parse_form_file("test/nfa1.dot");
             System.out.println("acepta ab?: " + nfa.accepts("ab"));
             //NFAAutomataMethodsTests.test2 -OK
@@ -50,22 +50,6 @@ public class Main {
             System.out.println("acepta a?: " + my_dfa2.accepts("a"));
 
             //IntegrationTests.test3
-            NFALambda my_nfalambda = (NFALambda) FA.parse_form_file("test/nfalambda1.dot");
-            DFA dfa4 = my_nfalambda.toDFA();
-            System.out.println("acepta casa?: " + dfa4.accepts("casa"));
-            System.out.println("acepta asa?: " + dfa4.accepts("asa"));
-            System.out.println("acepta cas?: " + dfa4.accepts("cas"));
-            System.out.println("acepta asac?: " + dfa4.accepts("asac"));*/
-            
-            
-            //IntegrationTests.test2 -OK
-            NFA my_nfa = (NFA) FA.parse_form_file("test/nfa1.dot");
-            DFA my_dfa2 = my_nfa.toDFA();
-            System.out.println("acepta ab?: " + my_dfa2.accepts("ab"));
-            System.out.println("acepta abaaaaa?: " + my_dfa2.accepts("abaaaaa"));
-            System.out.println("acepta abbbb?: " + my_dfa2.accepts("abbbb"));
-            System.out.println("acepta a?: " + my_dfa2.accepts("a"));
-            
             NFALambda my_nfalambda = (NFALambda) FA.parse_form_file("test/nfalambda1.dot");
             DFA dfa4 = my_nfalambda.toDFA();
             System.out.println("acepta casa?: " + dfa4.accepts("casa"));
