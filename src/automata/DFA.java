@@ -851,11 +851,14 @@ public class DFA extends FA {
     public DFA minimizacion() {
         //completamos el automata para aplicar el proceso de minimizacion
         DFA completo = this.completarDFA();
-        //lista de clases de estados indistinguibles entre si
-        LinkedList<StateClass> clasesIndistinguibles = new LinkedList();
+        //listas de clases de estados indistinguibles entre si
+        //antes de calcular delta
+        LinkedList<StateClass> clasesIndistinguibles1 = new LinkedList();
+        //luego de calcular delta y reagrupar estados
+        LinkedList<StateClass> clasesIndistinguibles2 = new LinkedList();
         //primero separamos los estados en finales y no finales
         //lista de estados finales
-        LinkedHashSet<State> finales = new LinkedHashSet(this.final_states());
+        LinkedList<State> finales = new LinkedList(this.final_states());
         //lista de nombres de los estados finales
         LinkedList<String> nombresFinales = new LinkedList();
         //buscamos todos los nombres de los estados finales
@@ -863,13 +866,51 @@ public class DFA extends FA {
             nombresFinales.add(s.name());
         }
         //lista de estados no finales
-        LinkedHashSet<State> noFinales = new LinkedHashSet();
+        LinkedList<State> noFinales = new LinkedList();
         //buscamos los estados no finales en el automata completo
         for (State s : completo.states()) {
             if (!nombresFinales.contains(s.name())) {
                 noFinales.add(s);
             }
         }
+        //creamos un conj de estados finales (los cuales son indistinguibles por el hecho de ser finales)
+        StateClass claseFinales = new StateClass(finales.getFirst());
+        for (State s : finales) {
+            if (!s.name().equals(finales.getFirst().name())) {
+                claseFinales.addState(s);
+            }
+        }
+        //hacemos lo mismo con los estados no finales
+        StateClass claseNoFinales = new StateClass(noFinales.getFirst());
+        for (State s : noFinales) {
+            if (!s.name().equals(noFinales.getFirst().name())) {
+                claseNoFinales.addState(s);
+            }
+        }
+        //al inicio los conj de los que disponemos son el de estados finales y el de estados
+        // no finales
+        clasesIndistinguibles1.add(claseFinales);
+        clasesIndistinguibles1.add(claseNoFinales);
+
+        //lista de resultado de aplicar a un estado la delta con todo 
+        //caracter del alfabeto
+        LinkedList<LinkedList<State>> listaResultTodos = new LinkedList();
+
+        //para todo estado calculamos su delta con todo caracter del alfabeto
+        for (State s : completo.states()) {
+            //lista de resultados para un estado
+            LinkedList<State> resultadoUnEstado = new LinkedList();
+            for (Character c : this.alphabet()) {
+                //calculamos la delta del estado con cada caracter
+                State resultUnDelta = delta(s, c);
+                //y lo agregamos a la lista de resultados
+                resultadoUnEstado.add(resultUnDelta);
+            }
+            //al finalizar agregamos la lista de resultados con un estado al resultado general
+            listaResultTodos.add(resultadoUnEstado);
+        }
+
+        //sino (si el conj de finales es unitario)
         return this;
     }
 }

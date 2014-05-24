@@ -7,7 +7,7 @@
 package utils;
 
 import automata.State;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 
 /**
  * clase que implementa clases de estados las cuales seran utilizadas para el proceso
@@ -19,16 +19,16 @@ import java.util.LinkedHashSet;
 public class StateClass {
     //estado cabeza de la clase de estados indistinguibles entre si
     State header;
-    //conjuntos de estados indistinguibles entre si
-    LinkedHashSet<State> states;
+    //lista de nombres de los estados que serian indistinguibles del header
+    LinkedList<String> states;
 
     //constructor de clase
     //recibe como parametro un estado que sera
     //la cabecera del conjunto
     public StateClass(State s){
         header=s;
-        states=new LinkedHashSet();
-        states.add(s);
+        states=new LinkedList();
+        states.add(s.name());
     }
     
     public State getHeader() {
@@ -39,11 +39,11 @@ public class StateClass {
         this.header = header;
     }
 
-    public LinkedHashSet<State> getStates() {
+    public LinkedList<String> getStates() {
         return states;
     }
 
-    public void setStates(LinkedHashSet<State> states) {
+    public void setStates(LinkedList<String> states) {
         this.states = states;
     }
     
@@ -52,13 +52,8 @@ public class StateClass {
     //si es que no esta incluido ya
     public void addState(State s){
         boolean agregar=true;
-        for(State state:this.states){
-            if(state.name().equals(s.name())){
-                agregar=false;
-            }
-        }
-        if(agregar){
-            states.add(s);
+        if(!states.contains(s.name())){
+            states.add(s.name());
         }
         
     }
