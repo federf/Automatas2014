@@ -257,7 +257,7 @@ public class NFALambda extends FA {
                 if (!resultadoSet.isEmpty()) {
                     //para todo conjunto de estados del conjunto potencia
                     for (Set<State> conj : newConjPotencia) {
-                            //vemos si el resultado obtenido ya esta presente, ya sea con el mismo orden
+                        //vemos si el resultado obtenido ya esta presente, ya sea con el mismo orden
                         // de elementos o como permutacion de alguno
                         if (conjEstadosIguales(conj, resultadoSet)) {
                             resultadoSet = (LinkedHashSet<State>) conj;
@@ -354,8 +354,7 @@ public class NFALambda extends FA {
         /*
          LIMPIAMOS EL AUTOMATA, ELIMINANDO ESTADOS INALCANZABLES Y LAS TRANSICIONES QUE SALGAN DE DICHOS ESTADOS
          */
-        /*        result = result.limpiarAutomata(result.delta);
-         System.out.println("salio del limpiar");*/
+        result = result.limpiarAutomata(result.delta);
         return result;
     }
 

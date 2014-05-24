@@ -298,8 +298,7 @@ public class NFA extends FA {
         /*
          LIMPIAMOS EL AUTOMATA, ELIMINANDO ESTADOS INALCANZABLES Y LAS TRANSICIONES QUE SALGAN DE DICHOS ESTADOS
          */
-/*        result = result.limpiarAutomata(result.delta);
-        System.out.println("salio del limpiar");*/
+        result = result.limpiarAutomata(result.delta);
         return result;
     }
 
