@@ -11,6 +11,7 @@ public class Main {
 
     public static void main(String[] args) {
         try {
+            /*
             //NFAAutomataMethodsTests.test1 -OK
             NFA nfa = (NFA) FA.parse_form_file("test/nfa1.dot");
             System.out.println("acepta ab?: " + nfa.accepts("ab"));
@@ -55,7 +56,20 @@ public class Main {
             System.out.println("acepta casa?: " + dfa4.accepts("casa"));
             System.out.println("acepta asa?: " + dfa4.accepts("asa"));
             System.out.println("acepta cas?: " + dfa4.accepts("cas"));
-            System.out.println("acepta asac?: " + dfa4.accepts("asac"));
+            System.out.println("acepta asac?: " + dfa4.accepts("asac"));*/
+            DFA dfa1=(DFA) FA.parse_form_file("test/dfa4.dot");
+            System.out.println("original");
+            System.out.println(dfa1.accepts("automatas"));
+            System.out.println(dfa1.accepts("y"));
+            System.out.println(dfa1.accepts("lenguajes"));
+            System.out.println(dfa1.accepts("autom"));
+            DFA dfaMinim=dfa1.minimizacion();
+            System.out.println("minimizado");
+            System.out.println(dfaMinim.accepts("automatas"));
+            System.out.println(dfaMinim.accepts("y"));
+            System.out.println(dfaMinim.accepts("lenguajes"));
+            System.out.println(dfaMinim.accepts("autom"));
+
 
         } catch (Exception e) { //Catch de excepciones
             System.err.println("Ocurrio un error: " + e.getMessage());

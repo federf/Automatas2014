@@ -4,7 +4,6 @@ import static automata.FA.Lambda;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Set;
-import utils.StateClass;
 
 import utils.Triple;
 
@@ -850,67 +849,217 @@ public class DFA extends FA {
      */
     public DFA minimizacion() {
         //completamos el automata para aplicar el proceso de minimizacion
-        DFA completo = this.completarDFA();
+        //DFA completo = this.completarDFA();
+
+        //lista de estados con acceso directo
+        LinkedList<State> estados = new LinkedList(this.states());
         //listas de clases de estados indistinguibles entre si
         //antes de calcular delta
-        LinkedList<StateClass> clasesIndistinguibles1 = new LinkedList();
+        LinkedList<LinkedList<State>> clasesIndistinguibles1 = new LinkedList();
         //luego de calcular delta y reagrupar estados
-        LinkedList<StateClass> clasesIndistinguibles2 = new LinkedList();
+        LinkedList<LinkedList<State>> clasesIndistinguibles2 = new LinkedList();
         //primero separamos los estados en finales y no finales
         //lista de estados finales
-        LinkedList<State> finales = new LinkedList(this.final_states());
-        //lista de nombres de los estados finales
+        LinkedList<State> finales = new LinkedList();
+        //lista de nombres de los estados finales para seleccionar los no finales
         LinkedList<String> nombresFinales = new LinkedList();
-        //buscamos todos los nombres de los estados finales
-        for (State s : finales) {
-            nombresFinales.add(s.name());
+        
+        System.out.println("finales");
+    
+        for (State f : this.final_states()) {
+            //si el estado final corriente no es el inicial ----------!!!CONSULTAR!!!
+            if (!f.name().equals(this.initial_state().name())) {
+                System.out.println(f.name());
+                finales.add(f);
+                nombresFinales.add(f.name());
+            }
         }
         //lista de estados no finales
         LinkedList<State> noFinales = new LinkedList();
-        //buscamos los estados no finales en el automata completo
-        for (State s : completo.states()) {
+        //seleccionamos los estados no finales del conj de estados
+        System.out.println("no-finales");
+        for (State s : this.states()) {
+            //si el nombre del estado no es el nombre de un estado final
             if (!nombresFinales.contains(s.name())) {
+                //lo agregamos al conj de estados no finales
+                System.out.println(s.name());
                 noFinales.add(s);
             }
         }
-        //creamos un conj de estados finales (los cuales son indistinguibles por el hecho de ser finales)
-        StateClass claseFinales = new StateClass(finales.getFirst());
-        for (State s : finales) {
-            if (!s.name().equals(finales.getFirst().name())) {
-                claseFinales.addState(s);
-            }
-        }
-        //hacemos lo mismo con los estados no finales
-        StateClass claseNoFinales = new StateClass(noFinales.getFirst());
-        for (State s : noFinales) {
-            if (!s.name().equals(noFinales.getFirst().name())) {
-                claseNoFinales.addState(s);
-            }
-        }
-        //al inicio los conj de los que disponemos son el de estados finales y el de estados
-        // no finales
-        clasesIndistinguibles1.add(claseFinales);
-        clasesIndistinguibles1.add(claseNoFinales);
+        //agregamos las listas como la 1era particion de estados
+        clasesIndistinguibles1.add(finales);
+        clasesIndistinguibles1.add(noFinales);
 
-        //lista de resultado de aplicar a un estado la delta con todo 
-        //caracter del alfabeto
-        LinkedList<LinkedList<State>> listaResultTodos = new LinkedList();
+        //si los conjuntos creados no son unitarios
+        if (finales.size() != 1 && noFinales.size() != 1) {
+            //mientras la particion antes y luego de buscar reducir la cantidad de estados
+            //no tengan el mismo tamaño
+            while (clasesIndistinguibles1.size() != clasesIndistinguibles2.size()) {
+                System.out.println("entro al ciclo " + clasesIndistinguibles1.size() + " " + clasesIndistinguibles2.size());
+                //copiamos la division original en una nueva lista
+                //clasesIndistinguibles2 = new LinkedList(clasesIndistinguibles1);
+                //comenzamos a ver si el conjunto puede ser dividido
+                //para cada conjunto vemos si podemos dividirlo en partes
+                for (LinkedList<State> unConj : clasesIndistinguibles1) {
+                    //lista de resultado de aplicar a todo estado del conjunto la delta con cada caracter del alfabeto
+                    LinkedList<LinkedList<String>> listaResultadosDeltaUnConjunto = new LinkedList();
+                    System.out.println(" ------conjunto ----------");
+                    for (State s : unConj) {
+                        //lista de resultados para un estado
+                        LinkedList<String> resultadoUnEstado = new LinkedList();
+                        for (Character c : this.alphabet()) {
+                            //estado resultado de delta(s,c) con todo estado s del conj de estados y caracter c del alfabeto
+                            State resultado = delta(s, c);
 
-        //para todo estado calculamos su delta con todo caracter del alfabeto
-        for (State s : completo.states()) {
-            //lista de resultados para un estado
-            LinkedList<State> resultadoUnEstado = new LinkedList();
-            for (Character c : this.alphabet()) {
-                //calculamos la delta del estado con cada caracter
-                State resultUnDelta = delta(s, c);
-                //y lo agregamos a la lista de resultados
-                resultadoUnEstado.add(resultUnDelta);
+                            System.out.println("resultado delta desde " + s.name() + "con caracter " + c + " :" + resultado.name());
+                            if (resultado.name().equals("")) {
+                                resultado = s;
+                            }
+                            //agregamos el resultado a la lista
+                            resultadoUnEstado.add(resultado.name());
+                        }
+                        //agregamos la lista de resultados a la lista general
+                        listaResultadosDeltaUnConjunto.add(resultadoUnEstado);
+                    }
+                    //para todo resultado agrupamos los estados que tuvieron el mismo resultado
+                    LinkedList<String> estadosYaEvaluados = new LinkedList();
+                    for (int i = 0; i < listaResultadosDeltaUnConjunto.size(); i++) {
+                        System.out.println(" ------ciclo conjuntos ----------");
+                        //si el iesimo estado no fue evaluado
+                        if (!estadosYaEvaluados.contains(estados.get(i).name())) {
+                            //conjunto de estados cuya delta con todo el alfabeto es identica
+                            LinkedList<State> unConjunto = new LinkedList();
+                            //creamos un conjunto de indistinguibles para el
+                            unConjunto.add(estados.get(i));
+                            //y lo marcamos como evaluado
+                            estadosYaEvaluados.add(estados.get(i).name());
+                            for (int j = i + 1; j < listaResultadosDeltaUnConjunto.size(); j++) {
+
+                                System.out.println(" indices " + i + " " + j);
+                                System.out.println(" estados " + estados.get(i).name() + " " + estados.get(j).name());
+
+                                //si el j-esimo estado aun no fue evaluado y marcado como indistinguible aun,
+                                //podemos ver si es indistinguible al i-esimo estado
+                                if (!estadosYaEvaluados.contains(estados.get(j).name())) {
+                                    //si dos conjuntos de resultados son iguales
+                                    System.out.println("resultado i-esimo " + listaResultadosDeltaUnConjunto.get(i).toString());
+                                    System.out.println("resultado j-esimo " + listaResultadosDeltaUnConjunto.get(j).toString());
+                                    if (listaResultadosDeltaUnConjunto.get(i).equals(listaResultadosDeltaUnConjunto.get(j))) {
+                                        //agregamos el estado j-esimo a la clase de estados indistinguibles del i-esimo estado
+                                        unConjunto.add(estados.get(j));
+                                        //y lo marcamos como ya evaluado
+                                        estadosYaEvaluados.add(estados.get(j).name());
+                                    }
+                                }
+                            }
+
+                            LinkedList<String> nombresConj = new LinkedList();
+                            for (State estado : unConjunto) {
+                                nombresConj.add(estado.name());
+                            }
+
+                            System.out.println("conjunto:   {" + nombresConj.toString() + "}");
+                            //agregamos el conjunto de estados indistinguibles creado a la nueva particion
+                            clasesIndistinguibles2.add(unConjunto);
+                        }
+                    }
+                }
+
+                System.out.println("cantidad antes: " + clasesIndistinguibles1.size());
+                System.out.println("cantidad despues: " + clasesIndistinguibles2.size());
+
+                //si la cantidad de estados no cambio luego de intentar minimizar
+                if (clasesIndistinguibles2.size() == clasesIndistinguibles2.size()) {
+                    System.out.println();
+                    //igualamos las divisiones antes y luego de minimizar para salir del ciclo
+                    clasesIndistinguibles1 = new LinkedList(clasesIndistinguibles2);
+                    clasesIndistinguibles2 = new LinkedList(clasesIndistinguibles1);
+                } else {
+                    //sino, actualizamos la division y ciclamos de nuevo
+                    clasesIndistinguibles1 = new LinkedList(clasesIndistinguibles2);
+                    clasesIndistinguibles2.clear();
+                }
             }
-            //al finalizar agregamos la lista de resultados con un estado al resultado general
-            listaResultTodos.add(resultadoUnEstado);
+            //si cambio la cantidad de estados
+            //comenzamos a crear el nuevo automata minimizado
+            if (this.states().size() > clasesIndistinguibles1.size()) {
+                //lista de nuevos estados
+                LinkedList<State> listaNuevosEstados = new LinkedList();
+                //lista de estados originales equivalentes a los nuevos
+                LinkedList<String> estadosEquivalentes = new LinkedList();
+                //creamos el nuevo conjunto de estados como una lista
+                for (LinkedList<State> s : clasesIndistinguibles1) {
+                    estadosEquivalentes.add(s.getFirst().name());
+                    //creamos el nombre del nuevo estado combinando el nombre de todos los estados del conjunto
+                    String nombreEstadoNuevo = "{";
+                    for (State e : s) {
+                        nombreEstadoNuevo = nombreEstadoNuevo + e.name() + " ,";
+                    }
+                    nombreEstadoNuevo = nombreEstadoNuevo + "}";
+                    State nuevo = new State(nombreEstadoNuevo);
+                    listaNuevosEstados.add(nuevo);
+                }
+                //nuevo conjunto de transiciones
+                LinkedHashSet<Triple<State, Character, State>> nuevasTransiciones = new LinkedHashSet();
+                //creamos el nuevo conjunto de transiciones
+                for (Triple<State, Character, State> transicionVieja : this.transiciones()) {
+                    State primero = transicionVieja.first();
+                    State tercero = transicionVieja.third();
+                    //si ambos estados de la transicion estan incluidos en los estados utilizados
+                    if (estadosEquivalentes.contains(primero.name()) && estadosEquivalentes.contains(tercero.name())) {
+                        //obtenemos los indices de los estados nuevos que serian sus equivalentes
+                        int indicePrimero = estadosEquivalentes.indexOf(primero.name());
+                        int indiceTercero = estadosEquivalentes.indexOf(tercero.name());
+                        //buscamos los estados para crear la nueva transicion
+                        State nuevoPrimero = listaNuevosEstados.get(indicePrimero);
+                        State nuevoTercero = listaNuevosEstados.get(indiceTercero);
+                        //creamos la nueva transicion
+                        Triple<State, Character, State> nuevaTransicion = new Triple(nuevoPrimero, transicionVieja.second(), nuevoTercero);
+                        //y la agregamos al nuevo conjunto de transiciones
+                        nuevasTransiciones.add(nuevaTransicion);
+                    }
+                }
+                //nuevo conjunto de estados finales
+                LinkedHashSet<State> nuevosFinales = new LinkedHashSet();
+                //creamos el nuevo conjunto de estados finales
+                //para todo estado final del automata original, vemos cuales siguen estando en el minimizado
+                for (State finalViejo : this.final_states()) {
+                    //si esta en la lista de estados equivalentes creada antes
+                    if (estadosEquivalentes.contains(finalViejo.name())) {
+                        //obtenemos el indice en que esta su equivalente
+                        int indiceNuevoFinal = estadosEquivalentes.indexOf(finalViejo.name());
+                        //y buscamos su equivalente para agregarlo al nuevo conjunto de estados finales
+                        nuevosFinales.add(listaNuevosEstados.get(indiceNuevoFinal));
+                    }
+                }
+                //creamos el automata minimizado
+                DFA minimizado = new DFA(new LinkedHashSet(listaNuevosEstados), this.alphabet(), nuevasTransiciones, this.initial_state(), nuevosFinales);
+                return minimizado;
+            } else {//si no cambia la cantidad de estados devolvemos el mismo automata original
+                System.out.println("no es posible minimizarlo");
+                return this;
+            }
+        } else {
+            System.out.println("no es posible minimizarlo, solo son dos nodos");
+            return this;
         }
-
-        //sino (si el conj de finales es unitario)
-        return this;
     }
+
+    /*
+     metodo que dado un estado y una particion de estados retorna el indice de la particiona la cual pertenece
+     retorna -1 si el estado no pertenece a ningun conjunto, lo cual indicaria que se debe crear un conjunto
+     */
+    public int perteneceA(State estado, LinkedList<LinkedList<State>> particion) {
+        int indice = -1;
+        for (int i = 0; i < particion.size(); i++) {
+            for (State s : particion.get(i)) {
+                if (s.name().equals(estado.name())) {
+                    indice = i;
+                    i = particion.size();
+                }
+            }
+        }
+        return indice;
+    }
+
 }
