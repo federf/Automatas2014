@@ -57,7 +57,8 @@ public class Main {
             System.out.println("acepta asa?: " + dfa4.accepts("asa"));
             System.out.println("acepta cas?: " + dfa4.accepts("cas"));
             System.out.println("acepta asac?: " + dfa4.accepts("asac"));*/
-            DFA dfa1=(DFA) FA.parse_form_file("test/dfa4.dot");
+            
+            /*DFA dfa1=(DFA) FA.parse_form_file("test/dfa4.dot");
             System.out.println("original");
             System.out.println(dfa1.accepts("automatas"));
             System.out.println(dfa1.accepts("y"));
@@ -68,7 +69,19 @@ public class Main {
             System.out.println(dfaMinim.accepts("automatas"));
             System.out.println(dfaMinim.accepts("y"));
             System.out.println(dfaMinim.accepts("lenguajes"));
-            System.out.println(dfaMinim.accepts("autom"));
+            System.out.println(dfaMinim.accepts("autom"));*/
+            
+            //dfa para test practica 3 ej 29 b
+            DFA test=(DFA) FA.parse_form_file("test/dfaTestMinim.dot");
+            System.out.println(test.accepts("1"));
+            System.out.println(test.accepts("11"));
+            System.out.println(test.accepts("0"));
+            System.out.println(test.accepts("01")); 
+            DFA minim=test.minimizacion();
+            System.out.println(minim.accepts("1"));
+            System.out.println(minim.accepts("11"));
+            System.out.println(minim.accepts("0"));
+            System.out.println(minim.accepts("01")); 
 
 
         } catch (Exception e) { //Catch de excepciones

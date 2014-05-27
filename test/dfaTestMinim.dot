@@ -1,0 +1,17 @@
+digraph {
+	inic[shape=point];
+    inic->a;
+    a->b [label="1"];
+    a->d [label="0"];
+    d->d [label="1"];
+    d->d [label="0"];
+    b->d [label="0"];
+    b->c [label="1"];
+    c->e [label="1"];
+    e->e [label="1"];
+    e->e [label="0"];
+    c->a [label="0"];
+    
+    c[shape=doublecircle];
+    b[shape=doublecircle];
+}
