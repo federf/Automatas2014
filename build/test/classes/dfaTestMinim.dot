@@ -11,6 +11,8 @@ digraph {
     e->e [label="1"];
     e->e [label="0"];
     c->a [label="0"];
+    f->a [label="0"];
+    f->b [label="1"];
     
     c[shape=doublecircle];
     b[shape=doublecircle];

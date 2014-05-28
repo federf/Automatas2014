@@ -58,19 +58,6 @@ public class Main {
             System.out.println("acepta cas?: " + dfa4.accepts("cas"));
             System.out.println("acepta asac?: " + dfa4.accepts("asac"));*/
             
-            /*DFA dfa1=(DFA) FA.parse_form_file("test/dfa4.dot");
-            System.out.println("original");
-            System.out.println(dfa1.accepts("automatas"));
-            System.out.println(dfa1.accepts("y"));
-            System.out.println(dfa1.accepts("lenguajes"));
-            System.out.println(dfa1.accepts("autom"));
-            DFA dfaMinim=dfa1.minimizacion();
-            System.out.println("minimizado");
-            System.out.println(dfaMinim.accepts("automatas"));
-            System.out.println(dfaMinim.accepts("y"));
-            System.out.println(dfaMinim.accepts("lenguajes"));
-            System.out.println(dfaMinim.accepts("autom"));*/
-            
             //dfa para test practica 3 ej 29 b
             DFA test=(DFA) FA.parse_form_file("test/dfaTestMinim.dot");
             System.out.println(test.accepts("1"));
@@ -81,7 +68,19 @@ public class Main {
             System.out.println(minim.accepts("1"));
             System.out.println(minim.accepts("11"));
             System.out.println(minim.accepts("0"));
-            System.out.println(minim.accepts("01")); 
+            System.out.println(minim.accepts("01"));
+            
+            /*DFA dfa1=(DFA) FA.parse_form_file("test/dfa1.dot");
+            System.out.println("1 -" + dfa1.accepts("ab"));
+            System.out.println("2 -" + dfa1.accepts("abbbbb"));
+            System.out.println("3 -" + dfa1.accepts("bbbbb"));
+            System.out.println("4 -" + dfa1.accepts("a"));
+            DFA minimDfa1=dfa1.minimizacion();
+            System.out.println("1 -" + minimDfa1.accepts("ab"));
+            System.out.println("2 -" + minimDfa1.accepts("abbbbb"));
+            System.out.println("3 -" + minimDfa1.accepts("bbbbb"));
+            System.out.println("4 -" + minimDfa1.accepts("a"));*/
+            
 
 
         } catch (Exception e) { //Catch de excepciones
