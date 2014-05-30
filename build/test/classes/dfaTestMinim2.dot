@@ -1,0 +1,11 @@
+digraph {
+	inic[shape=point];
+    inic->a2;
+    a2->b2 [label="a"];
+    b2->c2 [label="b"];
+    c2->d2 [label="b"];
+    d2->d2 [label="b"];
+    
+    c2[shape=doublecircle];
+    d2[shape=doublecircle];
+}
