@@ -13,7 +13,7 @@
             <url>src/Main.java</url>
             <bookmark id="2">
                 <name/>
-                <line>35</line>
+                <line>37</line>
                 <key/>
             </bookmark>
         </file>
@@ -22,8 +22,8 @@
         <group>
             <file>file:/home/fede/Escritorio/Automatas2014/Automatas2014/src/automata/DFA.java</file>
             <file>file:/home/fede/Escritorio/Automatas2014/Automatas2014/test/dfaTestMinim2.dot</file>
-            <file>file:/home/fede/Escritorio/Automatas2014/Automatas2014/test/dfaTestMinim.dot</file>
             <file>file:/home/fede/Escritorio/Automatas2014/Automatas2014/src/Main.java</file>
+            <file>file:/home/fede/Escritorio/Automatas2014/Automatas2014/test/dfa1.dot</file>
         </group>
     </open-files>
 </project-private>

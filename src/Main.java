@@ -1,4 +1,6 @@
 
+import automata.APD;
+import automata.AutomataPila;
 import automata.DFA;
 import automata.FA;
 import automata.NFA;
@@ -70,20 +72,11 @@ public class Main {
              System.out.println("3 -" + minimDfa1.accepts("bbbbb"));
              System.out.println("4 -" + minimDfa1.accepts("a"));*/
             //dfa para test practica 3 ej 29 b
-            DFA test = (DFA) FA.parse_form_file("test/dfaTestMinim.dot");
-            DFA test2 = (DFA) FA.parse_form_file("test/dfaTestMinim2.dot");
-            DFA test3 = (DFA) FA.parse_form_file("test/dfa1.dot");
-            DFA inter23 = test2.minimizar().intersection(test3.minimizar());
-            System.out.println("dfa1-----------" + test3.minimizar().to_dot());
-            System.out.println();
-            System.out.println("dfatestminim2-----------" + test2.minimizar().to_dot());
-            System.out.println();
-            System.out.println("interseccion-----------" + inter23.to_dot());
-            System.out.println();
+            DFA test2 = (DFA) FA.parse_form_file("test/testLenguaje.dot");
+            DFA test = (DFA) FA.parse_form_file("test/testLenguaje2.dot");
 
-            /*System.out.println("mismo lenguaje con automatas iguales dfa1 con dfa1? (true): " + test3.sameLanguage(test3));
-             System.out.println("mismo lenguaje con automatas iguales dfa1 con dfamimin2? (true): " + test3.sameLanguage(test2));
-             System.out.println("mismo lenguaje con automatas dfa2 con dfa1? (false): " + test4.sameLanguage(test3));*/
+            //System.out.println("mismo lenguaje con automatas iguales dfa1 con dfa1? (true): " + test3.sameLanguage(test3));
+            System.out.println("mismo lenguaje con automatas iguales dfa1 con dfamimin2? (true): " + test.sameLanguage(test2));
 
             /*System.out.println(test.accepts("1"));
              System.out.println(test.accepts("11"));
@@ -97,6 +90,14 @@ public class Main {
              System.out.println("dfatestminim2 acepta ab?: " + test2.minimizar().accepts("ab"));
              System.out.println("dfatestminim2 acepta abb?: " + test2.minimizar().accepts("abb"));
              System.out.println("dfatestminim2 acepta a?: " + test2.minimizar().accepts("a"));*/
+            /*APD apd1 = (APD) AutomataPila.parse_from_file("test/apd1.dot");
+             System.out.println();
+             //System.out.println(apd1.to_dot());
+             System.out.println("acepta aab?: "+apd1.accepts("aab"));
+             System.out.println("------------------------------------");
+             System.out.println("acepta aaab?: "+apd1.accepts("aaab"));
+             System.out.println("------------------------------------");
+             System.out.println("acepta aabb?: "+apd1.accepts("aabb"));*/
         } catch (Exception e) { //Catch de excepciones
             System.err.println("Ocurrio un error: " + e.getMessage());
         }

@@ -1103,7 +1103,7 @@ public class DFA extends FA {
                         //y la agregamos al nuevo conjunto de transiciones
                         //si es que aun no fue agregada
                         if (!nuevasTransiciones.isEmpty()) {
-                            if (!transRepetida(nuevaTransicion, nuevasTransiciones)) {
+                            if (!transContenida(nuevaTransicion, nuevasTransiciones)) {
                                 nuevasTransiciones.add(nuevaTransicion);
                                 //          System.out.println("transicion agregada: " + nuevaTransicion.first().name() + " -> " + nuevaTransicion.second() + " -> " + nuevaTransicion.third().name());
                             }/* else {
@@ -1172,190 +1172,14 @@ public class DFA extends FA {
 
     /*
      metodo que dado un conj de transiciones y una transicion
-     retorna true si la transicion no esta en el conjunto
+     retorna true si la transicion esta en el conjunto
      */
-    public boolean transRepetida(Triple<State, Character, State> trans, LinkedHashSet<Triple<State, Character, State>> transiciones) {
+    public boolean transContenida(Triple<State, Character, State> trans, LinkedHashSet<Triple<State, Character, State>> transiciones) {
         boolean repetida = false;
         for (Triple<State, Character, State> t : transiciones) {
             repetida = repetida || (t.first().name().equals(trans.first().name()) && t.second().equals(trans.second()) && t.third().name().equals(trans.third().name()));
         }
         return repetida;
-    }
-
-    /*
-     metodo que dados dos DFA devuelve true si tienen el mismo lenguaje
-     */
-    public boolean mismoLenguaje(DFA other) {
-        boolean result = true;
-        //si tienen distinto alfabeto, no pueden tener el mismo lenguaje
-        if (!this.alphabet().equals(other.alphabet())) {
-            //retornamos false
-            return false;
-        } else {//si tienen el mismo alfabeto
-            //minimizamos los automatas
-            DFA minimThis = this.minimizar();
-            DFA minimOther = other.minimizar();
-            //si tienen distinta cantidad de estados, no tienen el mismo lenguaje y retornamos false
-            if (minimThis.states().size() != minimOther.states().size()) {
-                return false;
-            }
-            //si uno tiene mas estados finales que el otro, retornamos false
-            if (minimThis.final_states().size() != minimOther.final_states().size()) {
-                return false;
-            }
-            //si uno tiene mas transiciones que otro, retornamos false
-            if (minimThis.transiciones().size() != minimOther.transiciones().size()) {
-                return false;
-            }
-            //si llego aca, es que tienen la misma cantidad de estados, estados finales y transiciones
-            //listas de estados de ambos automatas minimizados
-            LinkedList<State> estadosThis = new LinkedList(minimThis.states());
-            LinkedList<State> estadosOther = new LinkedList(minimOther.states());
-
-            //lista de estados al avanzar sobre this desde el inicial por todas las transiciones posibles un nivel a la vez
-            LinkedList<State> estadosPorThis = new LinkedList();
-            //caracteres por los cuales se avanzo en this a cada estado
-            LinkedList<Character> caracteresUsadosThis = new LinkedList();
-
-            //lista de estados al avanzar sobre other desde el inicial por todas las transiciones posibles un nivel a la vez
-            LinkedList<State> estadosPorOther = new LinkedList();
-            //caracteres por los cuales se avanzo en this a cada estado
-            LinkedList<Character> caracteresUsadosOther = new LinkedList();
-
-            //listas de nombres de los estados finales de ambos automatas
-            LinkedList<String> nombresFinalesThis = new LinkedList();
-            LinkedList<String> nombresFinalesOther = new LinkedList();
-            //obtenemos los nombres de los estados de ambos automatas
-            for (State s : minimThis.final_states()) {
-                nombresFinalesThis.add(s.name());
-            }
-
-            for (State s : minimOther.final_states()) {
-                nombresFinalesOther.add(s.name());
-            }
-
-            //avanzamos desde el inicial por todos los caracteres posibles en ambos automatas
-            //si alguno de los automatas no tiene una transicion por el caracter 
-            //corriente desde el inicial y el otro si, retornamos false
-            for (Character c : minimThis.alphabet()) {
-                //si ambos automatas tienen transiciones desde el inicial por el caracter c
-                System.out.println(c + " : " + minimThis.tieneTransicion(minimThis.inicial, c) + " " + minimOther.tieneTransicion(minimOther.inicial, c));
-
-                if (minimThis.tieneTransicion(minimThis.inicial, c)) {
-                    if (minimOther.tieneTransicion(minimOther.inicial, c)) {
-                        //calculamos los resultados y los guardamos
-
-                        //System.out.println("ambos tienen transicion por " + c);
-                        estadosPorThis.add(minimThis.delta(minimThis.inicial, c));
-                        caracteresUsadosThis.add(c);
-                        estadosPorOther.add(minimOther.delta(minimOther.inicial, c));
-                        caracteresUsadosOther.add(c);
-                    } else {
-                        //si el 2do no tiene transicion, desde el inicial con c, retornamos false
-
-                        //System.out.println("el 2do no tiene por " + c);
-                        return false;
-                    }
-                } else {//si el primer automata no tiene una transicion desde inicial con c y el 2do si la tiene
-                    if (minimOther.tieneTransicion(minimOther.inicial, c)) {
-
-                        //                        System.out.println("el 1ero no tiene y el 2do si por " + c);
-                        //retornamos false
-                        return false;
-                    } else {//caso contrario no hacemos nada y cambiaria de caracter
-                        System.out.println("ninguno tiene transicion por " + c + " : " + minimThis.tieneTransicion(minimThis.inicial, c) + " " + minimOther.tieneTransicion(minimOther.inicial, c));
-                    }
-                }
-            }
-            //si algun caracter usado no es el mismo en ambos automatas, retornamos false
-            for (int i = 0; i < caracteresUsadosThis.size(); i++) {
-                if (!caracteresUsadosThis.get(i).equals(caracteresUsadosOther.get(i))) {
-                    return false;
-                }
-            }
-
-            //lista de estados ya visitados
-            LinkedList<String> YaEvaluados = new LinkedList();
-            //marcamos que ya se paso por el inicial
-            YaEvaluados.add(minimThis.initial_state().name());
-
-            //mientras los conjuntos de estados sean iguales y no se hayan evaluado todos los estados de los automatas
-            while (estadosPorThis.size() == estadosPorOther.size() && (YaEvaluados.size() < minimThis.states().size())) {
-                caracteresUsadosThis.clear();
-                caracteresUsadosOther.clear();
-
-                /*System.out.println("entro ciclo while - YaEvaluados - " + YaEvaluados.size() + " - estados -" + this.states().size());
-                 System.out.println(estadosPorThis.size() + " - - " + estadosPorOther.size());
-                 System.out.println("ya evaluados " + YaEvaluados.toString());
-                 System.out.println("ya evaluados size" + YaEvaluados.size());*/
-                //listas de resultado interno al ciclo
-                LinkedList<State> porThis = new LinkedList();
-                LinkedList<State> porOther = new LinkedList();
-                for (int i = 0; i < estadosPorThis.size(); i++) {
-                    /*System.out.println("iesimo estado this " + estadosPorThis.get(i).name());
-                     System.out.println("iesimo estado other " + estadosPorOther.get(i).name());
-                     System.out.println("condicion if: " + YaEvaluados.contains(estadosPorThis.get(i).name()));*/
-                    //si el estado corriente aun no fue evaluado, lo evaluamos sino no 
-                    if (!YaEvaluados.contains(estadosPorThis.get(i).name())) {
-                        for (Character c : this.alphabet()) {
-                            //si algun automata no tiene transicion desde el i-esimo elemento por algun caracter c, y el otro si
-                            //retornamos false, sino seguimos evaluando
-
-                            if (minimThis.tieneTransicion(estadosPorThis.get(i), c)) {
-                                if (minimOther.tieneTransicion(estadosPorOther.get(i), c)) {
-
-                                    System.out.println("ambos tienen transicion por " + c);
-
-                                    //calculamos los resultados y los guardamos
-                                    estadosPorThis.add(minimThis.delta(estadosPorThis.get(i), c));
-                                    caracteresUsadosThis.add(c);
-                                    estadosPorOther.add(minimOther.delta(estadosPorOther.get(i), c));
-                                    caracteresUsadosOther.add(c);
-                                } else {
-                                    //si el 2do no tiene transicion, desde el i-esimo estado con c, retornamos false
-                                    System.out.println("el 2do no tiene por " + c);
-                                    return false;
-                                }
-                            } else {//si el primer automata no tiene una transicion desde el i-esimo estado con c y el 2do si la tiene
-                                if (minimOther.tieneTransicion(estadosPorOther.get(i), c)) {
-                                    System.out.println("el 1ero no tiene y el 2do si por " + c);
-                                    //retornamos false
-                                    return false;
-                                } else {//caso contrario no hacemos nada y cambiaria de caracter
-                                    System.out.println("ninguno tiene transicion por " + c + " : " + minimThis.tieneTransicion(estadosPorThis.get(i), c) + " " + minimOther.tieneTransicion(estadosPorOther.get(i), c));
-                                }
-                            }
-                        }
-                        //agregamos los estados que ya visitamos
-                        //tecnicamente si son iguales visitaremos estados equivalentes y siempre la misma cantidad en cada momento
-                        //habra sido visitada en cada automata
-                        if (!YaEvaluados.contains(estadosPorThis.get(i).name())) {
-                            YaEvaluados.add(estadosPorThis.get(i).name());
-                        }
-                    }
-                }
-
-                //si los caracteres con que se evaluaron no tienen el mismo orden en la lista
-                //de caracteres utilizados en cada automata al evaluar, devolvemos false
-                for (int i = 0; i < caracteresUsadosThis.size(); i++) {
-                    if (!caracteresUsadosThis.get(i).equals(caracteresUsadosOther.get(i))) {
-                        return false;
-                    }
-                }
-                //si al evaluar resultados, los i-esimos elementos de cada lista de resultados
-                //uno es final y el otro no, retornamos false, sino seguimos evaluando
-                for (int i = 0; i < porThis.size(); i++) {
-                    if (!nombresFinalesThis.contains(porThis.get(i).name()) || !nombresFinalesOther.contains(porOther.get(i).name())) {
-                        return false;
-                    }
-                }
-                //actualizamos los estados en los que el cada automata quedo "parado"
-                //y volvemos a ciclar
-                estadosPorThis = new LinkedList(porThis);
-                estadosPorOther = new LinkedList(porOther);
-            }
-            return result;
-        }
     }
 
     //metodo que dados dos DFA devuelve true si tienen el mismo lenguaje
@@ -1369,6 +1193,11 @@ public class DFA extends FA {
             //minimizamos los automatas
             DFA minimThis = this.minimizar();
             DFA minimOther = other.minimizar();
+
+            System.out.println(minimThis.to_dot());
+
+            System.out.println(minimOther.to_dot());
+
             //si tienen distinta cantidad de estados, no tienen el mismo lenguaje y retornamos false
             if (minimThis.states().size() != minimOther.states().size()) {
                 return false;
@@ -1382,120 +1211,188 @@ public class DFA extends FA {
                 return false;
             }
             //lista de triplas que representan los nodos del arbol de moore en que estariamos ubicados
-            LinkedList<triplaMoore> triplas = new LinkedList();
+            LinkedList<triplaMoore> triplasA = new LinkedList();
+            LinkedList<triplaMoore> triplasB = new LinkedList();
             State inicialThis = minimThis.initial_state();
             State inicialOther = minimOther.initial_state();
+            //vemos si los estados iniciales son equivalentes en cuanto a si uno es final y el otro tambien o ninguno
+            //de los dos es final
+            if (!minimThis.esFinal(minimThis.initial_state()) && minimOther.esFinal(minimOther.initial_state())) {
+                return false;
+            }
+            if (minimThis.esFinal(minimThis.initial_state()) && !minimOther.esFinal(minimOther.initial_state())) {
+                return false;
+            }
+
+            //lista de strings de triplas a utilizar para no agregar triplas repetidas
+            LinkedList<String> stringsTriplasMooreA = new LinkedList();
+            LinkedList<String> stringsTriplasMooreB = new LinkedList();
 
             //lista de elementos ya evaluados
-            LinkedList<String> nombresYaEvaluados = new LinkedList();
+            LinkedList<String> nombresYaEvaluadosA = new LinkedList();
+            LinkedList<String> nombresYaEvaluadosB = new LinkedList();
             //marcamos los iniciales de ambos automatas como ya evaluadas
-            nombresYaEvaluados.add(inicialThis.name());
-            nombresYaEvaluados.add(inicialOther.name());
+            nombresYaEvaluadosA.add(inicialThis.name());
+            nombresYaEvaluadosB.add(inicialOther.name());
 
-            for (Character c : minimThis.alphabet()) {
-                //y agregamos los resultados de las deltas a los ya evaluados
-                String cad = "" + c;
-                State deltaA = minimThis.delta(minimThis.initial_state(), c);
-                if (!nombresYaEvaluados.contains(deltaA.name())) {
-                    nombresYaEvaluados.add(deltaA.name());
-                }
-                triplaMoore nuevaTriplaA = new triplaMoore(minimThis.initial_state(), cad, deltaA);
-                triplas.add(nuevaTriplaA);
+            triplaMoore nuevaTriplaA = new triplaMoore(minimThis.initial_state(), "", minimThis.initial_state());
+            if (!stringsTriplasMooreA.contains(nuevaTriplaA.toString())) {
+                triplasA.add(nuevaTriplaA);
+                stringsTriplasMooreA.add(nuevaTriplaA.toString());
             }
-            for (Character c : minimOther.alphabet()) {
-                //y agregamos los resultados de las deltas a los ya evaluados
-                String cad = "" + c;
-                State deltaB = minimOther.delta(minimOther.initial_state(), c);
-                if (!nombresYaEvaluados.contains(deltaB.name())) {
-                    nombresYaEvaluados.add(deltaB.name());
-                }
-                triplaMoore nuevaTriplaB = new triplaMoore(minimOther.initial_state(), cad, deltaB);
-                triplas.add(nuevaTriplaB);
+            triplaMoore nuevaTriplaB = new triplaMoore(minimOther.initial_state(), "", minimOther.initial_state());
+            if (!stringsTriplasMooreB.contains(nuevaTriplaB.toString())) {
+                triplasB.add(nuevaTriplaB);
+                stringsTriplasMooreB.add(nuevaTriplaB.toString());
             }
 
-            //para toda tripla vemos si su 3er elem es final en algun automata y en el otro tambien
-            for (int i = 0; i < triplas.size() / 2; i++) {
-                for (int j = i + triplas.size() / 2; j < triplas.size(); j++) {
+            System.out.println("cantidad triplas A: " + triplasA.size());
+            System.out.println("cantidad triplas B: " + triplasB.size());
+
+            //si sale del for es porque no encontro dos elementos i-esimo y j-esimo tal que uno era final y el otro no
+            //mientras queden elementos por evaluar
+            while (nombresYaEvaluadosA.size() < (minimThis.states().size())) {
+                //nueva lista de triplas
+                LinkedList<triplaMoore> nuevasTriplasA = new LinkedList();
+                LinkedList<triplaMoore> nuevasTriplasB = new LinkedList();
+                String cadena = "";
+                //calculamos nuevas triplas con cadenas mas largas
+                for (triplaMoore t : triplasA) {
+                    System.out.println("cadena usada " + t.getCadenaUsada());
+                    for (Character c : minimThis.alphabet()) {
+                        cadena = t.getCadenaUsada();
+                        cadena = cadena + c;
+                        System.out.println("cadena nueva " + cadena);
+
+                        State deltaA = minimThis.deltaAcumulada(minimThis.initial_state(), cadena);
+                        if (!nombresYaEvaluadosA.contains(deltaA.name())) {
+                            nombresYaEvaluadosA.add(deltaA.name());
+                        }
+                        System.out.println("deltaA: "+deltaA.name());
+                        nuevaTriplaA = new triplaMoore(minimThis.initial_state(), cadena, deltaA);
+                        if (!stringsTriplasMooreA.contains(nuevaTriplaA.toString())) {
+                            nuevasTriplasA.add(nuevaTriplaA);
+                            stringsTriplasMooreA.add(nuevaTriplaA.toString());
+                            System.out.println("agrega A: "+nuevaTriplaA.toString());
+                        }
+                        //System.out.println(nuevaTriplaA.toString());
+                    }
+                }
+                for (triplaMoore t : triplasB) {
+                    System.out.println("cadena usada " + t.getCadenaUsada());
+                    for (Character c : minimThis.alphabet()) {
+                        cadena = t.getCadenaUsada();
+                        cadena = cadena + c;
+                        System.out.println("cadena nueva " + cadena);
+
+                        State deltaB = minimOther.deltaAcumulada(minimOther.initial_state(), cadena);
+                        if (!nombresYaEvaluadosB.contains(deltaB.name())) {
+                            nombresYaEvaluadosB.add(deltaB.name());
+                        }
+                        System.out.println("deltaB: "+deltaB.name());
+                        nuevaTriplaB = new triplaMoore(minimThis.initial_state(), cadena, deltaB);
+                        if (!stringsTriplasMooreB.contains(nuevaTriplaB.toString())) {
+                            nuevasTriplasB.add(nuevaTriplaB);
+                            stringsTriplasMooreB.add(nuevaTriplaB.toString());
+                            System.out.println("agrega B: "+nuevaTriplaB.toString());
+                        }
+                        //System.out.println(nuevaTriplaB.toString());
+                    }
+                }
+                
+                System.out.println();
+                System.out.println("triplas nuevas A:");
+                for (triplaMoore t : nuevasTriplasA) {
+                    System.out.println(t.toString());
+                }
+                System.out.println("salio");
+                System.out.println("triplas nuevas B:");
+                for (triplaMoore t : nuevasTriplasB) {
+                    System.out.println(t.toString());
+                }
+                System.out.println("salio");
+
+                System.out.println("alfabeto this: " + minimThis.alfabeto);
+                System.out.println("alfabeto other: " + minimOther.alfabeto);
+                System.out.println("nueva cantidad triplas : " + nuevasTriplasA.size());
+                //para toda tripla vemos si su 3er elem es final en algun automata y en el otro tambien
+                for (int i = 0; i < nuevasTriplasA.size(); i++) {
+                    System.out.println("i: " + i);
                     //si el i-esimo elemento (pertenece a la minimizacion del this) y el j-esimo elemento (pertenece
                     //a la minimizacion de other) son finales seguimos, si alguno es final y el otro no, retornamos false
                     //si el i-esimo no es final y el j-esimo si, retornamos false
-                    if (!minimThis.esFinal(triplas.get(i).getEstadoSalida()) && minimOther.esFinal(triplas.get(j).getEstadoSalida())) {
+
+                    if (!minimThis.esFinal(nuevasTriplasA.get(i).getEstadoDestino()) && minimOther.esFinal(nuevasTriplasB.get(i).getEstadoDestino())) {
+                        System.out.println("ACA ESTAMOS");
+                        System.out.println(nuevasTriplasA.get(i).toString());
+                        System.out.println(nuevasTriplasB.get(i).toString());
                         return false;
                     }
                     //si el i-esimo es final y el j-esimo no, retornamos false
-                    if (minimThis.esFinal(triplas.get(i).getEstadoSalida()) && !minimOther.esFinal(triplas.get(j).getEstadoSalida())) {
+                    if (minimThis.esFinal(nuevasTriplasA.get(i).getEstadoDestino()) && !minimOther.esFinal(nuevasTriplasB.get(i).getEstadoDestino())) {
+                        System.out.println("ACA ESTAMOS-2");
+                        System.out.println(nuevasTriplasA.get(i).toString());
+                        System.out.println(nuevasTriplasB.get(i).toString());
                         return false;
                     }
-                }
-            }
-            //si sale del for es porque no encontro dos elementos i-esimo y j-esimo tal que uno era final y el otro no
 
-            //mientras queden elementos por evaluar
-            while (nombresYaEvaluados.size() < (minimThis.states().size() * 2)) {
-                //nueva lista de triplas
-                LinkedList<triplaMoore> nuevasTriplas = new LinkedList();
-                String cadena = "";
-                for (triplaMoore t : triplas) {
-                    cadena = t.getCadenaUsada();
-                    for (Character c : minimThis.alphabet()) {
-                        cadena = cadena + c;
-
-                        State deltaA = minimThis.deltaAcumulada(minimThis.initial_state(), cadena);
-                        nombresYaEvaluados.add(deltaA.name());
-                        triplaMoore nuevaTriplaA = new triplaMoore(minimThis.initial_state(), cadena, deltaA);
-                        nuevasTriplas.add(nuevaTriplaA);
-
-                        State deltaB = minimOther.deltaAcumulada(minimOther.initial_state(), cadena);
-                        nombresYaEvaluados.add(deltaB.name());
-                        triplaMoore nuevaTriplaB = new triplaMoore(minimOther.initial_state(), cadena, deltaB);
-                        nuevasTriplas.add(nuevaTriplaB);
-                    }
                 }
 
-                //para toda tripla vemos si su 3er elem es final en algun automata y en el otro tambien
-                for (int i = 0; i < triplas.size() / 2; i++) {
-                    for (int j = i + triplas.size() / 2; j < triplas.size(); j++) {
-                        //si el i-esimo elemento (pertenece a la minimizacion del this) y el j-esimo elemento (pertenece
-                        //a la minimizacion de other) son finales seguimos, si alguno es final y el otro no, retornamos false
-                        //si el i-esimo no es final y el j-esimo si, retornamos false
-                        if (!minimThis.esFinal(triplas.get(i).getEstadoSalida()) && minimOther.esFinal(triplas.get(j).getEstadoSalida())) {
-                            return false;
-                        }
-                        //si el i-esimo es final y el j-esimo no, retornamos false
-                        if (minimThis.esFinal(triplas.get(i).getEstadoSalida()) && !minimOther.esFinal(triplas.get(j).getEstadoSalida())) {
-                            return false;
-                        }
-                    }
-                }
                 //si sale del for es porque no encontro dos elementos i-esimo y j-esimo tal que uno era final y el otro no
-
                 //luego de calcular las nuevas triplas, actualizamos el conjunto
-                triplas = new LinkedList(nuevasTriplas);
+                triplasA = new LinkedList(nuevasTriplasA);
+                triplasB = new LinkedList(nuevasTriplasB);
             }
 
-            LinkedList<LinkedList<Character>> estadosConCicloThis = new LinkedList();
-            LinkedList<LinkedList<Character>> estadosConCicloOther = new LinkedList();
-            //para toda tripla vemos si su 3er elem es final en algun automata y en el otro tambien
-            for (int i = 0; i < triplas.size() / 2; i++) {
-                for (int j = i + triplas.size() / 2; j < triplas.size(); j++) {
-                    //si el i-esimo elemento del primer automata tiene ciclo a si mismo por algun caracter y el j-esimo tambien
-                    //tiene ciclo por el mismo caracter
-                    //para todo caracter del alfabeto
-                    State actualA = triplas.get(i).getEstadoAlQueLlega();
-                    State actualB = triplas.get(j).getEstadoAlQueLlega();
-                    LinkedHashSet ciclosActualA=minimThis.ciclaPor(actualA);
-                    LinkedHashSet ciclosActualB=minimOther.ciclaPor(actualB);
-                    System.out.println("estado A."+actualA.name()+" cicla por "+ciclosActualA.toString());
-                    System.out.println("estado B."+actualB.name()+" cicla por "+ciclosActualB.toString());
-                    if(!ciclosActualA.equals(ciclosActualB)){
-                        return false;
-                    }
-                }
+            System.out.println("equiv : "+nombresYaEvaluadosA.toString()+" CON "+nombresYaEvaluadosB.toString());
+            System.out.println("salio aca..as.a.sda.as.das.das.d");
+            //creamos un automata nuevo equivalente al segundo (other) pero renombrando sus estados
+            // en base a la equivalencia de nombres obtenida al marcarlos
+            LinkedHashSet<State> estadosNuevoEquiv = new LinkedHashSet();
+            LinkedHashSet<State> estadosFinalesNuevoEquiv = new LinkedHashSet();
+            State inicialNuevoEquiv = new State(nombresYaEvaluadosA.get(nombresYaEvaluadosB.indexOf(minimOther.initial_state().name())));
+            LinkedHashSet<Triple<State, Character, State>> transicionesNuevoEquiv = new LinkedHashSet();
+            for (State s : minimOther.states()) {
+                int indice = nombresYaEvaluadosB.indexOf(s.name());
+                State nuevo = new State(nombresYaEvaluadosA.get(indice));
+                estadosNuevoEquiv.add(nuevo);
             }
-            //si sale del for es porque no encontro dos elementos i-esimo y j-esimo tal que uno era final y el otro no
+            for (State s : minimOther.final_states()) {
+                int indice = nombresYaEvaluadosB.indexOf(s.name());
+                State nuevo = new State(nombresYaEvaluadosA.get(indice));
+                estadosFinalesNuevoEquiv.add(nuevo);
+            }
+            for (Triple<State, Character, State> t : minimOther.transiciones()) {
+                int indicePrimero = nombresYaEvaluadosB.indexOf(t.first().name());
+                int indiceTercero = nombresYaEvaluadosB.indexOf(t.third().name());
+                State primero = new State(nombresYaEvaluadosA.get(indicePrimero));
+                State tercero = new State(nombresYaEvaluadosA.get(indiceTercero));
+                Triple<State, Character, State> nueva = new Triple(primero, t.second(), tercero);
+                transicionesNuevoEquiv.add(nueva);
+            }
+            //creamos un DFA equivalente a Other reemplazando los nombres de los estados por sus equivalentes en this
+            DFA nuevoEquiv = new DFA(estadosNuevoEquiv, minimOther.alphabet(), transicionesNuevoEquiv, inicialNuevoEquiv, estadosFinalesNuevoEquiv);
+            System.out.println(nuevoEquiv.to_dot());
 
-            //si sale del ciclo, es que ambos automatas son equivalentes, por ende retornamos true
-            return true;
+            //vemos si el nuevo DFA es igual a This, en tal caso This y Other tienen el mismo lenguaje
+            boolean estadosOk = true;
+            //vemos que todo estado del DFA nuevo es un estado del this (minimizado)
+            for (State s : nuevoEquiv.states()) {
+                estadosOk = estadosOk && (estaContenido(minimThis.states(), s));
+            }
+            boolean transOk = true;
+            //vemos que toda transicion del DFA nuevo es un estado del this (minimizado)
+            for (Triple<State, Character, State> t : nuevoEquiv.transiciones()) {
+                transOk = transOk && (transContenida(t, (LinkedHashSet<Triple<State, Character, State>>) minimThis.transiciones()));
+            }
+            boolean finalesOk = true;
+            //vemos que todo estado del DFA nuevo es un estado del this (minimizado)
+            for (State s : nuevoEquiv.final_states()) {
+                finalesOk = finalesOk && (estaContenido(minimThis.final_states(), s));
+            }
+            boolean inicOk = minimThis.initial_state().name().equals(nuevoEquiv.initial_state().name());
+            boolean alfabetoOk = minimThis.alphabet().equals(nuevoEquiv.alphabet());
+            return (estadosOk && transOk && finalesOk && inicOk && alfabetoOk);
         }
 
     }
@@ -1511,6 +1408,15 @@ public class DFA extends FA {
         return (nombresFinales.contains(s.name()));
     }
 
+    //metodo que dado un estado y un conjunto de estados devuelve true si el estado pertenece al conjunto
+    public boolean estaContenido(Set<State> set, State s) {
+        LinkedList<String> nombresSet = new LinkedList();
+        for (State s1 : set) {
+            nombresSet.add(s1.name());
+        }
+        return nombresSet.contains(s.name());
+    }
+
     /*
      metodo que dado un estado devuelve el conj de caracteres por los cuales tiene un ciclo a si mismo
      */
@@ -1518,7 +1424,7 @@ public class DFA extends FA {
         LinkedHashSet<Character> result = new LinkedHashSet();
         System.out.println("caract");
         for (Character c : this.alphabet()) {
-            
+
             if (tieneTransicion(s, c)) {
                 if (this.delta(s, c).name().equals(s.name())) {
                     result.add(c);

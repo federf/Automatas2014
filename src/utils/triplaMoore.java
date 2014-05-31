@@ -46,11 +46,17 @@ public class triplaMoore {
         this.cadenaUsada = cadenaUsada;
     }
 
-    public State getEstadoAlQueLlega() {
+    public State getEstadoDestino() {
         return estadoAlQueLlega;
     }
 
-    public void setEstadoAlQueLlega(State estadoAlQueLlega) {
+    public void setEstadoDestino(State estadoAlQueLlega) {
         this.estadoAlQueLlega = estadoAlQueLlega;
+    }
+    
+    @Override
+    public String toString(){
+        String result=""+this.getEstadoSalida().name()+" -> "+this.getCadenaUsada()+" -> "+this.getEstadoDestino().name();
+        return result;
     }
 }
