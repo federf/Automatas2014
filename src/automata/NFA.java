@@ -83,11 +83,11 @@ public class NFA extends FA {
                 }
             }
 
-            String resultadoNombres = "[";
+            /*String resultadoNombres = "[";
             for (State t : result) {
                 resultadoNombres = resultadoNombres + t.name().toString() + ";";
             }
-            resultadoNombres = resultadoNombres + "]";
+            resultadoNombres = resultadoNombres + "]";*/
             //System.out.println("resultado por " + c + " desde " + from.name() + ": " + resultadoNombres);
             return result;
         } else {
@@ -316,12 +316,12 @@ public class NFA extends FA {
         for (State s : estados) { //buscamos los nombres de los estados
             states.add(s.name());
         }
-        System.out.println("estados: " + states);
+        //System.out.println("estados: " + states);
         LinkedList<String> finales = new LinkedList();
         for (State f : estados_finales) {  //buscamos los nombres de los estados finales
             finales.add(f.name());
         }
-        System.out.println("estados finales: " + finales);
+        //System.out.println("estados finales: " + finales);
 
         for (int i = 0; i < states.size(); i++) { //verificamos que el estado inicial pertenece al conjunto de estados
             inicOk = inicOk || (states.get(i).equals(inicial.name()));
@@ -334,7 +334,7 @@ public class NFA extends FA {
         for (Triple<State, Character, State> t : delta) { //verificamos que las transiciones son validas 
             transicionesOk = transicionesOk && (states.contains(t.first().name()) && states.contains(t.third().name()) && alfabeto.contains(t.second())); // (los estados utilizados pertenecen al conjunto de estados y el simbolo utilizado pertenece al alfabeto)
         }
-        System.out.println("transOk: " + transicionesOk + " finalesOk: " + finalesOk + " inicOk: " + inicOk + " noLamda en alfabeto: " + noLambda);
+        //System.out.println("transOk: " + transicionesOk + " finalesOk: " + finalesOk + " inicOk: " + inicOk + " noLamda en alfabeto: " + noLambda);
 
         return (inicOk && finalesOk && transicionesOk && noLambda);
 
@@ -358,10 +358,10 @@ public class NFA extends FA {
             }
         } else {
             if (string.isEmpty()) {
-                System.out.println("cadena vacia ");
+                //System.out.println("cadena vacia ");
                 return est;
             } else {
-                System.out.println("conjunto de estados vacio");
+                //System.out.println("conjunto de estados vacio");
                 return new LinkedHashSet<State>();
             }
         }

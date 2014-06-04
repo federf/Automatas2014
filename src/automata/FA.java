@@ -81,7 +81,7 @@ public abstract class FA {
             while ((strLinea = buffer.readLine()) != null) {
                 if (!strLinea.isEmpty()) { //si la linea leida no es vacia, vemos que tenemos que agregar
                     strLinea = strLinea.trim();//quitamos los espacios innecesarios
-                    System.out.println("");
+                    //System.out.println("");
                     if (strLinea.contains("inic->")) { //si la linea tiene el formato de un estado inicial
                         estadoLeido = strLinea.split("->")[1];
                         estadoLeido = estadoLeido.replace(";", "");
@@ -229,12 +229,12 @@ public abstract class FA {
             
             /***********************************************************/
             
-            System.out.println("cant estados: " + estados.size());
+            //System.out.println("cant estados: " + estados.size());
 
             if (automataACrear.equals("AFNLambda")) {
                 NFALambda NFALamb = new NFALambda(estados, alfabeto, delta, inicial, estados_finales);
                 if (NFALamb.rep_ok()) {
-                    System.out.println("CREO AFNLAMBDA");
+                    //System.out.println("CREO AFNLAMBDA");
                     return NFALamb;
                 } else {
                     return null;
@@ -244,7 +244,7 @@ public abstract class FA {
                 if (automataACrear.equals("AFN")) {
                     NFA Nfa = new NFA(estados, alfabeto, delta, inicial, estados_finales);
                     if (Nfa.rep_ok()) {
-                        System.out.println("CREO AFN");
+                        //System.out.println("CREO AFN");
                         return Nfa;
                     } else {
                         return null;
@@ -253,7 +253,7 @@ public abstract class FA {
                 } else {
                     DFA Dfa = new DFA(estados, alfabeto, delta, inicial, estados_finales);
                     if (Dfa.rep_ok()) {
-                        System.out.println("CREO AFD");
+                        //System.out.println("CREO AFD");
                         return Dfa;
                     } else {
                         return null;

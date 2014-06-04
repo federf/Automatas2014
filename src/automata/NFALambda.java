@@ -141,8 +141,8 @@ public class NFALambda extends FA {
     @Override //CONSULTAR, TENGO UN PROBLEMA CON EL TEMA DE LAS LLAMADAS CON LAMBDA EN DELTAACUMULADA
     public boolean accepts(String string
     ) {
-        System.out.println();
-        System.out.println("acepta " + string + "?");
+        /*System.out.println();
+        System.out.println("acepta " + string + "?");*/
 
         assert rep_ok();
         assert string != null;
@@ -153,15 +153,15 @@ public class NFALambda extends FA {
             LinkedHashSet<State> acum = new LinkedHashSet(clausuraLambda(this.initial_state(), clausura));  //calculamos la clausura lambda del estado inicial
             Set<State> deltaAcum = deltaAcumulada(acum, string); //aplicamos la delta acumulada
             boolean accepted = false;
-            for (State s2 : this.final_states()) {
+            /*for (State s2 : this.final_states()) {
                 System.out.println("estado: " + s2.name());
             }
-            System.out.print("delta acumulada {");
+            //System.out.print("delta acumulada {");
             for (State s : deltaAcum) {
                 System.out.print(s.name() + " ");
             }
             System.out.print("}");
-            System.out.println();
+            System.out.println();*/
             for (State s : deltaAcum) { //al final, el ultimo conjunto de estados contiene al menos un estado final
                 for (State s2 : this.final_states()) {
                     if (s.name().equals(s2.name())) { //si es asi, la cadena es aceptada
@@ -385,7 +385,7 @@ public class NFALambda extends FA {
         }
 
         for (Triple<State, Character, State> t : delta) { //verificamos que las transiciones son validas 
-            System.out.println(t.first().name() + " " + t.second() + " " + t.third().name());
+            //System.out.println(t.first().name() + " " + t.second() + " " + t.third().name());
             if (!t.second().equals(Lambda)) {//si no es una transicion lambda verificamos que todos sus elementos sean correctos
                 transicionesOk = transicionesOk && (states.contains(t.first().name()) && states.contains(t.third().name()) && alfabeto.contains(t.second())); // (los estados utilizados pertenecen al conjunto de estados y el simbolo utilizado pertenece al alfabeto)
             } else {
@@ -444,19 +444,12 @@ public class NFALambda extends FA {
      */
     public Set<State> deltaAcumulada(Set<State> est, String string) { //CONSULTAR TRATAMIENTO POR LAMBDA!!!! FALTA AGREGARLO, EL QUE ESTA ES EL TRATAMIENTO DEL NFA SIN LAMBDA
 
-        System.out.println("");
-        if (!string.isEmpty()) {
-            System.out.println("caracter: " + string.charAt(0));
-        } else {
-            System.out.println("caracter: vacio");
-        }
-
-        System.out.println("est:");
+        /*System.out.println("est:");
         System.out.print("{");
         for (State s : est) {
             System.out.print(s.name() + " ");
         }
-        System.out.println("}");
+        System.out.println("}");*/
 
         LinkedHashSet<State> result = new LinkedHashSet();
         LinkedHashSet<State> resultadoParcial = new LinkedHashSet();//lista de estados ya obtenidos
@@ -468,12 +461,12 @@ public class NFALambda extends FA {
                 resultadoParcial = (LinkedHashSet<State>) unirConjuntosEstados(resultadoParcial, conUnChar);//unimos los resultados
             }
 
-            System.out.println("resParcial:");
+            /*System.out.println("resParcial:");
             System.out.print("{");
             for (State s : resultadoParcial) {
                 System.out.print(s.name() + " ");
             }
-            System.out.println("}");
+            System.out.println("}");*/
 
             LinkedHashSet<State> resultadoClausura = new LinkedHashSet();//resultado de aplicar la clausura lambda al resultado parcial obtenido
             for (State s : resultadoParcial) {//clausuramos el resultado obtenido
@@ -481,12 +474,12 @@ public class NFALambda extends FA {
                 resultadoClausura = (LinkedHashSet<State>) unirConjuntosEstados(resultadoClausura, clausuraLambda(s, list));
             }
 
-            System.out.println("clausura:");
+            /*System.out.println("clausura:");
             System.out.print("{");
             for (State s : resultadoClausura) {
                 System.out.print(s.name() + " ");
             }
-            System.out.println("}");
+            System.out.println("}");*/
 
             if (puedeAvanzarPorCaracter) {
                 String substring = string.substring(1);//quitamos el 1er elemento de la cadena
@@ -505,10 +498,10 @@ public class NFALambda extends FA {
             return result;
         } else {
             if (string.isEmpty()) {
-                System.out.println("cadena vacia ");
+                //System.out.println("cadena vacia ");
                 return est;
             } else {
-                System.out.println("conjunto de estados vacio");
+                //System.out.println("conjunto de estados vacio");
                 return new LinkedHashSet<State>();
             }
         }

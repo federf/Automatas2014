@@ -87,7 +87,11 @@ public class APD extends AutomataPila {
                         if (topePilaDespues[0] == Lambda) {
                             this.stack.removeLast();
                         } else {//sino, apilamos el primer elemento de la transicion
-                            this.stack.addLast(c);
+                            this.stack.removeLast();
+                            for(int i=0; i<topePilaDespues.length; i++){
+                                Character unCarac=topePilaDespues[i];
+                                this.stack.addLast(unCarac);
+                            }
                         }
                         System.out.println("trans: " + t.second());
                         System.out.println("retorna: " + t.third().name());
