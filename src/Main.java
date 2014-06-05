@@ -88,9 +88,13 @@ public class Main {
 //            System.out.println("acepta cas?: " + dfa4.accepts("cas"));
 //            System.out.println("acepta asac?: " + dfa4.accepts("asac"));
             ParserRecDes p=new ParserRecDes();
-            System.out.println("valida?: "+p.evaluar("a"));
-            System.out.println("valida?: "+p.evaluar("a+b*"));
-            System.out.println("valida?: "+p.evaluar("a++b*"));
+            System.out.println("valida?: "+p.valida("a"));
+            System.out.println("valida?: "+p.valida("a+b*"));
+            System.out.println("valida?: "+p.valida("a+(b.c)+d*+(b.c)*"));
+            System.out.println("valida?: "+p.valida("a++b*"));
+            System.out.println("valida?: "+p.valida("(a.(a+b)*)+c"));
+            System.out.println("valida?: "+p.valida("(a.(a+b)*))+c"));
+            grep.grep.grep("a.b.b*", "test/pruebaGrepDFA1.txt");
         } catch (Exception e) { //Catch de excepciones
             System.err.println("Ocurrio un error: " + e.getMessage());
         }

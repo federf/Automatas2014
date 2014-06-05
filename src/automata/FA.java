@@ -385,7 +385,7 @@ public abstract class FA {
     /*
      metodo que dados dos conjuntos de estados, retorna la union entre ambos conjuntos
      */
-    public Set<State> unirConjuntosEstados(Set<State> unConj, Set<State> otroConj) {
+    public static Set<State> unirConjuntosEstados(Set<State> unConj, Set<State> otroConj) {
         LinkedHashSet<State> result = new LinkedHashSet();
         LinkedList<String> nombresEstadosUno = new LinkedList();//lista de nombres del 1er conjunto y en el cual se agregaran los elementos
         LinkedList<String> nombresEstadosOtro = new LinkedList();
@@ -429,5 +429,6 @@ public abstract class FA {
             return false;
         }
     }
-
+    
+    public abstract Set<Triple<State,Character,State>> transiciones();
 }

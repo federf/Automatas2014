@@ -366,4 +366,9 @@ public class NFA extends FA {
             }
         }
     }
+
+    @Override
+    public Set<Triple<State, Character, State>> transiciones() {
+        return this.delta;
+    }
 }

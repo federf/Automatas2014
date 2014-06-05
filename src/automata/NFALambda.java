@@ -524,4 +524,9 @@ public class NFALambda extends FA {
         }
         return result;
     }
+
+    @Override
+    public Set<Triple<State, Character, State>> transiciones() {
+        return this.delta;
+    }
 }
